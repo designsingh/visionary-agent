@@ -1,0 +1,33 @@
+# Project Context: Visionary Design Agent (2026)
+You are an expert full-stack engineer and design leader. We are building an autonomous agent that scrapes "boring" local business websites, analyzes their branding, and generates a modern redesign using the v0 Platform API.
+
+# Tech Stack Guidelines
+1. **Cloudflare Workers**: Use `wrangler` and `wrangler.toml`. Use the REST API for Browser Rendering (`/json`, `/screenshot`).
+2. **v0 SDK**: Use `import { V0 } from 'v0-sdk'`. The API Key is in `process.env.V0_API_KEY`.
+3. **Redesign Logic**:
+   - Step 1: Use CF `/json` to extract: {businessName, primaryColors, services, tagline, targetAudience}.
+   - Step 2: Use v0 to generate a "Bento Box" style landing page in Next.js/Tailwind/Shadcn.
+   - Step 3: Use CF `/screenshot` to capture both URLs.
+
+# Design Principles
+- The redesign must reflect 'Design Leadership' (clean hierarchy, high contrast, mobile-first).
+- Avoid generic hero sections; use the business's actual service list for the content.
+- Include a "Verified by DesignX" badge in the footer for credibility.
+
+# Implementation Task
+Build a CLI-based prototype first that:
+1. Takes a URL as input.
+2. Extracts branding data using Cloudflare.
+3. Generates a v0 redesign.
+4. Saves a side-by-side .png comparison to an `output/` folder.
+
+# The "Redesign Logic" Prompt (For v0)
+When your code calls the v0 API, use this specific prompt to ensure it doesn't look like a $5 template:
+
+"Act as a Senior Product Designer. Redesign the landing page for [Business Name].
+Current Branding: [Colors].
+Architecture: Use a modern 'Bento Box' layout for services.
+Typography: Use a bold sans-serif (Inter or Geist).
+Optimization: Ensure the CTA ('Book a Quote') is sticky on mobile.
+Content: Use these extracted services: [Service List].
+Vibe: Minimalist, trustworthy, and high-performance. Do not use stock photos; use clean placeholders with geometric patterns."

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Visionary – Design Scout</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0c0f14;
+      --surface: #151922;
+      --border: #252a33;
+      --text: #e6edf3;
+      --muted: #7d8590;
+      --accent: #6ee7b7;
+      --accent-dim: #2d9d78;
+      --error: #f87171;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "DM Sans", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+    .wrap { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin: 0 0 0.25rem;
+    }
+    .tagline { color: var(--muted); font-size: 0.95rem; margin-bottom: 2rem; }
+    section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    section h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 0 0 1rem;
+      color: var(--accent);
+    }
+    .row { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: flex-end; }
+    input[type="url"], input[type="text"] {
+      flex: 1;
+      min-width: 200px;
+      padding: 0.6rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.95rem;
+    }
+    input::placeholder { color: var(--muted); }
+    input:focus {
+      outline: none;
+      border-color: var(--accent-dim);
+      box-shadow: 0 0 0 2px rgba(45, 157, 120, 0.2);
+    }
+    button {
+      padding: 0.6rem 1.25rem;
+      border: none;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: var(--accent);
+      color: var(--bg);
+    }
+    button:hover { background: #5dd9a8; }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    .out {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 8px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.85rem;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .out.error { border-color: var(--error); color: var(--error); }
+    .out.success { border-color: var(--accent-dim); }
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+    .gallery a {
+      display: block;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      color: inherit;
+      text-decoration: none;
+    }
+    .gallery a:hover { border-color: var(--accent-dim); }
+    .gallery img {
+      width: 100%;
+      height: auto;
+      display: block;
+      background: var(--bg);
+    }
+    .gallery span {
+      display: block;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .empty { color: var(--muted); font-size: 0.9rem; }
+    .loading { opacity: 0.7; }
+    label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 0.35rem; }
+    .field { margin-bottom: 0.75rem; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Visionary</h1>
+    <p class="tagline">Analyze sites, capture screenshots, compare before & after.</p>
+
+    <section>
+      <h2>Analyze (Scout)</h2>
+      <div class="field">
+        <label for="scout-url">URL to analyze</label>
+        <div class="row">
+          <input id="scout-url" type="url" placeholder="https://example.com" />
+          <button id="scout-btn">Analyze</button>
+        </div>
+      </div>
+      <div id="scout-out" class="out" style="display: none;"></div>
+    </section>
+
+    <section>
+      <h2>Compare</h2>
+      <div class="field">
+        <label for="before-url">Before URL</label>
+        <input id="before-url" type="url" placeholder="https://example.com" />
+      </div>
+      <div class="field">
+        <label for="after-url">After URL (optional – single screenshot if empty)</label>
+        <input id="after-url" type="url" placeholder="https://redesign.example.com" />
+      </div>
+      <div class="row">
+        <button id="compare-btn">Capture / Compare</button>
+      </div>
+      <div id="compare-out" class="out" style="display: none;"></div>
+    </section>
+
+    <section>
+      <h2>Output</h2>
+      <div id="gallery" class="gallery">
+        <span class="empty">Loading…</span>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const scoutUrl = document.getElementById("scout-url");
+    const scoutBtn = document.getElementById("scout-btn");
+    const scoutOut = document.getElementById("scout-out");
+
+    scoutBtn.addEventListener("click", async () => {
+      const url = scoutUrl.value.trim();
+      if (!url) return;
+      scoutOut.style.display = "block";
+      scoutOut.className = "out loading";
+      scoutOut.textContent = "Analyzing…";
+      scoutBtn.disabled = true;
+      try {
+        const r = await fetch("/api/scout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url }),
+        });
+        const data = await r.json();
+        if (!r.ok) {
+          scoutOut.className = "out error";
+          scoutOut.textContent = data.error || r.statusText;
+          return;
+        }
+        scoutOut.className = "out success";
+        scoutOut.textContent = JSON.stringify(data, null, 2);
+      } catch (e) {
+        scoutOut.className = "out error";
+        scoutOut.textContent = e.message || String(e);
+      } finally {
+        scoutBtn.disabled = false;
+      }
+    });
+
+    const beforeUrl = document.getElementById("before-url");
+    const afterUrl = document.getElementById("after-url");
+    const compareBtn = document.getElementById("compare-btn");
+    const compareOut = document.getElementById("compare-out");
+
+    compareBtn.addEventListener("click", async () => {
+      const before = beforeUrl.value.trim();
+      if (!before) return;
+      compareOut.style.display = "block";
+      compareOut.className = "out loading";
+      compareOut.textContent = "Capturing…";
+      compareBtn.disabled = true;
+      try {
+        const r = await fetch("/api/compare", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ beforeUrl: before, afterUrl: afterUrl.value.trim() || undefined }),
+        });
+        const data = await r.json();
+        if (!r.ok) {
+          compareOut.className = "out error";
+          compareOut.textContent = data.error || r.statusText;
+          return;
+        }
+        compareOut.className = "out success";
+        compareOut.innerHTML = 'Saved. <a href="' + data.url + '" target="_blank" rel="noopener" style="color: var(--accent);">Open image</a>';
+        loadGallery();
+      } catch (e) {
+        compareOut.className = "out error";
+        compareOut.textContent = e.message || String(e);
+      } finally {
+        compareBtn.disabled = false;
+      }
+    });
+
+    async function loadGallery() {
+      const el = document.getElementById("gallery");
+      try {
+        const r = await fetch("/api/output");
+        const data = await r.json();
+        if (data.files && data.files.length) {
+          el.innerHTML = data.files.map((f) =>
+            `<a href="${f.url}" target="_blank" rel="noopener"><img src="${f.url}" alt="" loading="lazy" /><span>${f.name}</span></a>`
+          ).join("");
+        } else {
+          el.innerHTML = '<span class="empty">No screenshots yet. Use Compare above.</span>';
+        }
+      } catch {
+        el.innerHTML = '<span class="empty">Could not load list.</span>';
+      }
+    }
+    loadGallery();
+  </script>
+</body>
+</html>
