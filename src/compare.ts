@@ -11,8 +11,11 @@
 
 import "dotenv/config";
 import { join } from "path";
+import { fileURLToPath } from "url";
 import sharp from "sharp";
 import { captureScreenshot } from "./screenshot.js";
+
+const __filename = fileURLToPath(import.meta.url);
 
 const VIEWPORT = { width: 1280, height: 720 };
 const LABEL_HEIGHT = 48;
@@ -141,7 +144,10 @@ async function main() {
   console.log("Saved →", result.path);
 }
 
-main().catch((e) => {
-  console.error("Error:", e instanceof Error ? e.message : e);
-  process.exit(1);
-});
+const runAsCli = process.argv[1] && (process.argv[1] === __filename || process.argv[1].endsWith("compare.ts"));
+if (runAsCli) {
+  main().catch((e) => {
+    console.error("Error:", e instanceof Error ? e.message : e);
+    process.exit(1);
+  });
+}

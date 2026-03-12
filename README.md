@@ -33,7 +33,7 @@ Automate the sales funnel for local business redesigns: analyze sites with Cloud
 
 The scout prints extracted branding: `businessName`, `primaryColors`, `services`, `tagline`, `targetAudience`.
 
-## Planned flow
+## Pipeline (generate-pitch)
 
 1. **Scout** (this repo) – `scout.ts` uses CF `/json` to extract branding from a URL.
 2. **Redesign** – Call v0 with the “Redesign Logic” prompt and generated Bento-style landing page.
@@ -45,7 +45,7 @@ The scout prints extracted branding: `businessName`, `primaryColors`, `services`
 |--------|-------------|
 | `npm run scout -- <url>` | Analyze URL with Cloudflare `/json`, print branding JSON. |
 | `npm run compare -- <beforeUrl> [afterUrl]` | Screenshot one or two URLs via CF `/screenshot`, save side-by-side PNG to `output/`. |
-| `npm run ui` | Start the web UI at http://localhost:3333 (analyze, compare, view gallery). |
+| `npm run ui` | Start the web UI at http://localhost:3333 (analyze, generate pitch, compare, gallery). |
 | `npm run dev` | Watch mode for `scout.ts`. |
 
 ## Design principles
@@ -58,9 +58,10 @@ The scout prints extracted branding: `businessName`, `primaryColors`, `services`
 
 Run `npm run ui` and open **http://localhost:3333**. You get:
 
-- **Analyze** – Enter a URL and run the scout; see branding JSON (businessName, colors, services, tagline, audience).
-- **Compare** – Enter before (and optional after) URL, capture screenshots or a side-by-side comparison; new images appear in the gallery.
-- **Output** – Gallery of all saved screenshots and comparisons from `output/`.
+- **Analyze** – Scout a URL (CF `/json`) and see branding JSON.
+- **Generate pitch** – Run the full pipeline: capture screenshot → Gemini Brain (Design Director) → v0 build. Returns brain JSON and links to v0 chat + preview.
+- **Compare** – Capture before/after screenshots or side-by-side; images saved to `output/`.
+- **Output** – Gallery of screenshots and comparisons.
 
 ## Push to GitHub
 
@@ -82,6 +83,8 @@ Run `npm run ui` and open **http://localhost:3333**. You get:
 
 | Variable | Required for | Description |
 |----------|--------------|-------------|
-| `CLOUDFLARE_ACCOUNT_ID` | Scout, screenshots | Cloudflare account ID. |
-| `CLOUDFLARE_API_TOKEN` | Scout, screenshots | API token with Browser Rendering - Edit. |
-| `V0_API_KEY` | Redesign step | From [v0.dev/chat/settings/keys](https://v0.dev/chat/settings/keys). |
+| `CLOUDFLARE_ACCOUNT_ID` | Capture, scout, compare | Cloudflare account ID. |
+| `CLOUDFLARE_API_TOKEN` | Capture, scout, compare | API token with Browser Rendering - Edit. |
+| `GEMINI_API_KEY` | Generate pitch (Brain) | From [Google AI Studio](https://aistudio.google.com/apikey). |
+| `GEMINI_MODEL` | Optional | Default `gemini-2.5-pro`. Set to `gemini-3.1-pro-preview` for 3.1 Pro. |
+| `V0_API_KEY` | Generate pitch (Build) | From [v0.dev/chat/settings/keys](https://v0.dev/chat/settings/keys). |

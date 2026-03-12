@@ -9,7 +9,10 @@
  */
 
 import "dotenv/config";
+import { fileURLToPath } from "url";
 import Cloudflare from "cloudflare";
+
+const __filename = fileURLToPath(import.meta.url);
 
 /** Response format for Cloudflare /json – SDK expects type + json_schema. */
 const BRANDING_RESPONSE_FORMAT = {
@@ -68,14 +71,15 @@ export async function analyzeWithCloudflareJson(url: string): Promise<BrandingDa
     response_format: BRANDING_RESPONSE_FORMAT,
   });
 
-  if (!response.success || response.result == null) {
-    const err = response as { success: false; errors?: unknown[] };
-    throw new Error(
-      "Cloudflare /json request failed: " + JSON.stringify(err.errors ?? response)
-    );
+  const result = response.result as BrandingData | null | undefined;
+  if (result != null && typeof result === "object" && typeof result.businessName === "string") {
+    return result;
   }
 
-  return response.result as BrandingData;
+  const err = response as { success?: boolean; errors?: unknown[] };
+  throw new Error(
+    "Cloudflare /json request failed: " + JSON.stringify(err.errors ?? result ?? response)
+  );
 }
 
 async function main() {
@@ -102,4 +106,5 @@ async function main() {
   }
 }
 
-main();
+const runAsCli = process.argv[1] && (process.argv[1] === __filename || process.argv[1].endsWith("scout.ts"));
+if (runAsCli) main();

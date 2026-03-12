@@ -10,6 +10,7 @@ import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { analyzeWithCloudflareJson } from "./scout.js";
 import { runCompare, OUTPUT_DIR } from "./compare.js";
+import { generatePitch, type PipelineStep } from "./pipeline.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, "..");
@@ -19,9 +20,13 @@ const outputDir = join(root, OUTPUT_DIR);
 const app = express();
 app.use(express.json());
 
-// Static: UI and output images
-app.use(express.static(publicDir));
+// Static: output images
 app.use("/output", express.static(outputDir));
+// UI: explicitly serve index at /
+app.use(express.static(publicDir));
+app.get("/", (_req, res) => {
+  res.sendFile(join(publicDir, "index.html"));
+});
 
 // API: list comparison/screenshot images
 app.get("/api/output", async (_req, res) => {
@@ -69,7 +74,44 @@ app.post("/api/compare", async (req, res) => {
   }
 });
 
+// API: generate pitch (SSE stream – CAPTURE → BRAIN → BUILD → COMPARE)
+app.get("/api/generate-pitch", async (req, res) => {
+  const url = req.query.url as string | undefined;
+  if (!url || !url.startsWith("http")) {
+    res.status(400).json({ error: "Missing or invalid ?url= query param" });
+    return;
+  }
+
+  res.writeHead(200, {
+    "Content-Type": "text/event-stream",
+    "Cache-Control": "no-cache",
+    Connection: "keep-alive",
+  });
+
+  const send = (step: PipelineStep) => {
+    res.write(`data: ${JSON.stringify(step)}\n\n`);
+  };
+
+  try {
+    await generatePitch(url, send);
+  } catch (e) {
+    send({ step: "error", message: e instanceof Error ? e.message : String(e) });
+  }
+
+  res.end();
+});
+
 const PORT = Number(process.env.PORT) || 3333;
-app.listen(PORT, () => {
+const HOST = process.env.HOST || "0.0.0.0";
+
+app.listen(PORT, HOST, () => {
   console.log(`Visionary UI → http://localhost:${PORT}`);
+  console.log(`            → http://127.0.0.1:${PORT}`);
+}).on("error", (err: NodeJS.ErrnoException) => {
+  if (err.code === "EADDRINUSE") {
+    console.error(`Port ${PORT} is in use. Try: PORT=${PORT + 1} npm run ui`);
+  } else {
+    console.error(err);
+  }
+  process.exit(1);
 });
