@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { Globe, Camera, ChevronLeft, ChevronRight } from "lucide-react";
 import WindowChrome from "./WindowChrome";
 
 interface UrlInputProps {
@@ -33,74 +33,69 @@ const UrlInput = ({ onSubmit, isLoading }: UrlInputProps) => {
   };
 
   return (
-    <div className="space-y-4">
-      {/* Input vs window: pill label above, input = white + thin border */}
-      <div>
-        <span className="inline-block font-mono text-[10px] font-medium uppercase tracking-wider text-primary-foreground bg-primary px-2.5 py-1 rounded-full mb-2">
-          Target URL
-        </span>
-        <WindowChrome title="Address">
-          <div className="flex items-center gap-1 p-3 bg-[hsl(0_0%_100%)] border-b-2 border-border-muted">
-            <button type="button" className="p-1.5 rounded-md border border-border-input hover:bg-muted/50 text-muted-foreground" aria-label="Back">
-              <ChevronLeft className="h-3.5 w-3.5" />
-            </button>
-            <button type="button" className="p-1.5 rounded-md border border-border-input hover:bg-muted/50 text-muted-foreground" aria-label="Forward">
-              <ChevronRight className="h-3.5 w-3.5" />
-            </button>
-            <div className="flex-1 flex items-center gap-2 px-3 py-2 border-2 border-border-input rounded-lg bg-[hsl(0_0%_100%)] min-w-0">
-              <Search className="h-4 w-4 text-muted-foreground shrink-0" />
+    <div className="space-y-6">
+      <WindowChrome title="Capture_v2.exe">
+        <div className="p-6 md:p-8">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1 flex items-center window-border bg-white overflow-hidden shadow-[inset_0_2px_4px_rgba(0,0,0,0.05)] focus-within:ring-4 focus-within:ring-[var(--text-main)]/20 focus-within:border-[var(--text-main)] transition-all rounded-[var(--radius)]">
+              <div className="px-4 py-4 border-r-[3px] border-[var(--text-main)] bg-gray-50 flex items-center justify-center shrink-0">
+                <Globe className="h-5 w-5 text-[var(--text-main)]" strokeWidth={2} />
+              </div>
               <input
                 type="text"
                 value={url}
                 onChange={(e) => { setUrl(e.target.value); setError(""); }}
                 onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-                placeholder="https://example.com"
-                className="flex-1 min-w-0 py-1 text-sm placeholder:text-muted-foreground focus:outline-none font-mono bg-transparent disabled:opacity-50"
+                placeholder="Enter URL to grab..."
+                className="w-full px-4 py-4 text-base font-mono font-medium focus:outline-none bg-transparent placeholder:opacity-50 min-w-0"
                 disabled={isLoading}
               />
             </div>
             <button
+              type="button"
               onClick={handleSubmit}
               disabled={isLoading}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 transition-colors disabled:opacity-50 shrink-0 border-2 border-border rounded-lg"
+              className="px-8 py-4 text-lg font-bold window-border bg-primary text-primary-foreground shadow-btn hover:-translate-y-1 active:translate-y-0 active:shadow-none transition-all whitespace-nowrap flex items-center justify-center gap-2 rounded-[var(--radius)] disabled:opacity-50"
             >
               {isLoading ? (
-                <>
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground" />
-                  Crawling...
-                </>
+                <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground" />
               ) : (
                 <>
+                  <Camera className="h-5 w-5" strokeWidth={2} />
                   Grab
-                  <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
                 </>
               )}
             </button>
           </div>
-        </WindowChrome>
-      </div>
+          <div className="flex flex-wrap items-center justify-center gap-3 mt-8 text-sm font-bold">
+            <span className="opacity-70 flex items-center gap-1">
+              <span className="font-mono">Quick Try:</span>
+            </span>
+            {EXAMPLE_URLS.map((u) => (
+              <button
+                key={u}
+                type="button"
+                onClick={() => { setUrl(u); setError(""); }}
+                disabled={isLoading}
+                className="px-3 py-1.5 border-dashed-select rounded-lg hover:bg-white/60 transition-colors font-mono hover:scale-105 active:scale-95 disabled:opacity-50"
+              >
+                {new URL(u).hostname}
+              </button>
+            ))}
+          </div>
+        </div>
+      </WindowChrome>
       {error && (
-        <div className="border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+        <div className="window-border rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive">
           {error}
         </div>
       )}
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">Try:</span>
-        {EXAMPLE_URLS.map((u) => (
-          <button
-            key={u}
-            type="button"
-            onClick={() => { setUrl(u); setError(""); }}
-            disabled={isLoading}
-            className="font-mono text-xs px-3 py-1.5 border-2 border-border-muted rounded-full bg-card hover:bg-accent/20 hover:border-accent/50 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
-          >
-            {new URL(u).hostname}
-          </button>
-        ))}
+      <div className="flex items-center justify-center">
+        <p className="text-sm font-bold bg-white/70 backdrop-blur-sm window-border px-5 py-2.5 rounded-full shadow-btn inline-flex items-center gap-2">
+          <span className="w-5 h-5 rounded-full bg-[var(--traffic-red)] border-2 border-[var(--text-main)] flex items-center justify-center text-white text-[10px]" aria-hidden>!</span>
+          Data purges automatically in 10 mins
+        </p>
       </div>
-      <p className="font-mono text-xs text-muted-foreground">
-        Data purges in 10 min.
-      </p>
     </div>
   );
 };

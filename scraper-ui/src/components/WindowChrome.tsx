@@ -5,18 +5,20 @@ interface WindowChromeProps {
   variant?: "orange" | "pink";
 }
 
-/** 90s-style window frame: colored title bar, traffic light buttons */
+/** Variant-style window: 3px border, hard shadow, title bar with traffic lights */
 const WindowChrome = ({ title, children, className = "", variant = "orange" }: WindowChromeProps) => (
-  <div className={`border-2 border-border bg-card shadow-card overflow-hidden rounded-lg ${className}`}>
-    {/* Title bar — orange or pink, macOS-style traffic lights */}
-    <div className={`flex items-center justify-between border-b-2 border-border px-2 py-1.5 ${variant === "pink" ? "bg-title-bar-pink" : "bg-[hsl(var(--title-bar))]"}`}>
+  <div className={`window-border rounded-[var(--radius)] overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-window-hover ${variant === "pink" ? "bg-[hsl(var(--title-bar-pink))]" : "bg-[hsl(var(--title-bar))]"} shadow-window ${className}`}>
+    <div className="border-b-[3px] border-[var(--text-main)] px-4 py-3 flex items-center justify-between bg-white/40 backdrop-blur-sm">
       <div className="flex items-center gap-2 min-w-0">
-        <div className="flex items-center gap-1.5 shrink-0">
-          <span className="w-3.5 h-3.5 rounded-full bg-[#FF5F57] border border-[rgba(0,0,0,0.15)] flex items-center justify-center" title="Close" />
-          <span className="w-3.5 h-3.5 rounded-full bg-[#FFBD2E] border border-[rgba(0,0,0,0.15)] flex items-center justify-center" title="Minimize" />
-          <span className="w-3.5 h-3.5 rounded-full bg-[#28CA42] border border-[rgba(0,0,0,0.15)] flex items-center justify-center" title="Maximize" />
+        <div className="flex gap-2 shrink-0">
+          <span className="w-3.5 h-3.5 rounded-full border-2 border-[var(--text-main)] bg-[var(--traffic-red)]" title="Close" />
+          <span className="w-3.5 h-3.5 rounded-full border-2 border-[var(--text-main)] bg-[var(--traffic-yellow)]" title="Minimize" />
+          <span className="w-3.5 h-3.5 rounded-full border-2 border-[var(--text-main)] bg-[var(--traffic-green)]" title="Maximize" />
         </div>
-        <span className="font-mono text-[11px] text-white truncate ml-2 font-medium">{title}</span>
+        <div className="flex-1 flex justify-center min-w-0">
+          <div className="h-1.5 w-20 border-y-2 border-[var(--text-main)] opacity-30 hidden sm:block" />
+        </div>
+        <span className="font-mono text-xs font-bold text-[var(--text-main)] truncate ml-2 opacity-90">{title}</span>
       </div>
     </div>
     {children}

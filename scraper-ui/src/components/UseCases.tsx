@@ -11,21 +11,28 @@ const UseCases = () => {
   ];
 
   return (
-    <section className="relative z-10 border-t-2 border-border px-4 py-20 sm:px-6 bg-muted/20">
+    <section className="relative z-10 border-t-[3px] border-[var(--text-main)] px-6 py-20 sm:px-6 bg-muted/30">
       <div className="mx-auto max-w-5xl">
-        <div className="mb-14">
-          <p className="font-mono text-xs text-muted-foreground uppercase tracking-wider mb-2">Use cases</p>
-          <h2 className="text-2xl font-semibold text-foreground">Results, not API docs</h2>
+        <div className="mb-12 border-b-[3px] border-[var(--text-main)] pb-4">
+          <h2 className="text-2xl font-bold text-[var(--text-main)]">Results, not API docs</h2>
+          <p className="mt-1 text-sm font-medium text-[var(--text-main)] opacity-80">Use cases</p>
         </div>
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {cases.map((c) => (
-            <div key={c.title} className="border-2 border-border bg-card shadow-card rounded-lg overflow-hidden hover:shadow-md hover:border-primary/40 transition-all group">
-              <div className="p-5">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg border-2 border-border bg-accent/20 group-hover:bg-accent/30 transition-colors mb-4">
-                  <c.icon className="h-5 w-5 text-accent-foreground" strokeWidth={2} />
+            <div key={c.title} className="window-border rounded-[var(--radius)] overflow-hidden shadow-window hover:-translate-y-1 hover:shadow-window-hover transition-all bg-white">
+              <div className="border-b-[3px] border-[var(--text-main)] px-3 py-2 flex items-center justify-between bg-white/40">
+                <div className="flex gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full border-[1.5px] border-[var(--text-main)] bg-[var(--traffic-red)]" />
+                  <span className="w-2.5 h-2.5 rounded-full border-[1.5px] border-[var(--text-main)] bg-[var(--traffic-yellow)]" />
+                  <span className="w-2.5 h-2.5 rounded-full border-[1.5px] border-[var(--text-main)] bg-[var(--traffic-green)]" />
                 </div>
-                <h3 className="text-base font-semibold text-foreground">{c.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{c.desc}</p>
+              </div>
+              <div className="p-5">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg window-border bg-[hsl(var(--accent))]/20 mb-4">
+                  <c.icon className="h-5 w-5 text-[var(--text-main)]" strokeWidth={2} />
+                </div>
+                <h3 className="text-base font-bold text-[var(--text-main)]">{c.title}</h3>
+                <p className="mt-2 text-sm font-medium text-[var(--text-main)] opacity-90 leading-relaxed">{c.desc}</p>
               </div>
             </div>
           ))}

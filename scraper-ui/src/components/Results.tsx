@@ -94,9 +94,9 @@ const Results = ({ pages, formats, pageContent = {} }: ResultsProps) => {
   const CopyBtn = ({ text, id }: { text: string; id: string }) => (
     <button
       onClick={() => copyToClipboard(text, id)}
-      className="flex items-center gap-1.5 border-2 border-border rounded-lg px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted transition-colors"
+      className="flex items-center gap-1.5 window-border rounded-lg px-3 py-1.5 text-xs font-bold text-[var(--text-main)] hover:bg-white/60 transition-colors shadow-btn active:translate-y-0.5 active:shadow-none"
     >
-      {copied === id ? <Check className="h-3.5 w-3.5 text-sticker" /> : <Copy className="h-3.5 w-3.5" />}
+      {copied === id ? <Check className="h-3.5 w-3.5 text-[var(--traffic-green)]" /> : <Copy className="h-3.5 w-3.5" />}
       {copied === id ? "Copied" : "Copy"}
     </button>
   );
@@ -104,7 +104,7 @@ const Results = ({ pages, formats, pageContent = {} }: ResultsProps) => {
   const DownloadBtn = ({ onClick, label }: { onClick: () => void; label: string }) => (
     <button
       onClick={onClick}
-      className="flex items-center gap-1.5 border-2 border-border rounded-lg px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted transition-colors"
+      className="flex items-center gap-1.5 window-border rounded-lg px-3 py-1.5 text-xs font-bold text-[var(--text-main)] hover:bg-white/60 transition-colors shadow-btn active:translate-y-0.5 active:shadow-none"
     >
       <Download className="h-3.5 w-3.5" />
       {label}
@@ -113,26 +113,32 @@ const Results = ({ pages, formats, pageContent = {} }: ResultsProps) => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between border-2 border-border bg-card px-4 py-3 shadow-card rounded-lg">
+      <div className="flex items-center justify-between window-border bg-white px-4 py-3 shadow-window rounded-[var(--radius)]">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Clock className="h-4 w-4" />
           <span>Available <span className="font-mono font-medium text-foreground tabular-nums">{formatTime(countdown)}</span></span>
         </div>
-        <button className="flex items-center gap-2 border border-primary bg-primary px-3 py-2 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors">
+        <button className="flex items-center gap-2 window-border bg-primary px-4 py-2 text-xs font-bold text-primary-foreground shadow-btn hover:-translate-y-0.5 active:translate-y-0 active:shadow-none transition-all">
           <Download className="h-3.5 w-3.5" />
           Download All as ZIP
         </button>
       </div>
 
-      {pages.map((page, i) => (
-        <div key={page.path} className="border-2 border-border bg-card shadow-card overflow-hidden rounded-lg">
-          {/* Content card: alternating pink/orange title bars */}
-          <div className={`flex items-center justify-between border-b-2 border-border px-4 py-2.5 ${i % 2 === 0 ? "bg-[hsl(var(--title-bar))]" : "bg-title-bar-pink"}`}>
-            <div>
-              <h4 className="text-sm font-semibold text-white">{page.title}</h4>
-              <p className="font-mono text-xs text-white/80">{page.path}</p>
+      {pages.map((page, i) => {
+        const cardBg = [ "bg-[hsl(var(--card-1))]", "bg-[hsl(var(--card-2))]", "bg-[hsl(var(--card-3))]" ][i % 3];
+        return (
+        <div key={page.path} className={`window-border overflow-hidden rounded-[var(--radius)] shadow-window ${cardBg}`}>
+          <div className="border-b-[3px] border-[var(--text-main)] px-4 py-3 flex items-center justify-between bg-white/40">
+            <div className="flex gap-1.5 shrink-0">
+              <span className="w-2.5 h-2.5 rounded-full border-[1.5px] border-[var(--text-main)] bg-[var(--traffic-red)]" />
+              <span className="w-2.5 h-2.5 rounded-full border-[1.5px] border-[var(--text-main)] bg-[var(--traffic-yellow)]" />
+              <span className="w-2.5 h-2.5 rounded-full border-[1.5px] border-[var(--text-main)] bg-[var(--traffic-green)]" />
             </div>
-            <span className="font-mono text-[10px] uppercase tracking-wider text-white/90 border border-white/40 px-2 py-0.5 rounded">Captured</span>
+            <div className="min-w-0 flex-1 mx-3">
+              <h4 className="text-sm font-bold text-[var(--text-main)] truncate">{page.title}</h4>
+              <p className="font-mono text-xs text-[var(--text-main)] opacity-80 truncate">{page.path}</p>
+            </div>
+            <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--text-main)] border-2 border-[var(--text-main)] px-2 py-0.5 rounded shrink-0">Captured</span>
           </div>
 
           {formats.length > 1 && (
@@ -212,7 +218,7 @@ const Results = ({ pages, formats, pageContent = {} }: ResultsProps) => {
             })()}
           </div>
         </div>
-      ))}
+      );})}
     </div>
   );
 };

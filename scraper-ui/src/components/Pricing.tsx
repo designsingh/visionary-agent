@@ -6,22 +6,26 @@ const Pricing = () => {
   const [submitted, setSubmitted] = useState(false);
 
   return (
-    <section className="relative z-10 border-t-2 border-border px-4 py-20 sm:px-6 bg-background">
+    <section className="relative z-10 border-t-[3px] border-[var(--text-main)] px-6 py-20 bg-background">
       <div className="mx-auto max-w-xl">
-        <p className="font-mono text-xs text-muted-foreground uppercase tracking-wider mb-2 text-center">Pricing</p>
-        <h2 className="text-2xl font-semibold text-foreground text-center">Free</h2>
-        <p className="mt-2 text-sm text-muted-foreground leading-relaxed text-center max-w-md mx-auto">
+        <p className="font-mono text-xs text-[var(--text-main)] opacity-70 uppercase tracking-wider mb-2 text-center">Pricing</p>
+        <h2 className="text-2xl font-bold text-[var(--text-main)] text-center">Free</h2>
+        <p className="mt-2 text-sm font-medium text-[var(--text-main)] opacity-90 leading-relaxed text-center max-w-md mx-auto">
           No sign-up, no limits. Basic tool stays free. Paid tiers later for bulk crawls & API.
         </p>
 
-        <div className="mt-10 border-2 border-border bg-card shadow-card rounded-lg overflow-hidden">
-          <div className="flex items-center gap-3 border-b-2 border-border px-4 py-2.5 bg-[hsl(var(--title-bar))]">
-            <Mail className="h-4 w-4 text-white" />
-            <span className="font-mono text-sm font-medium text-white">API launch — notify me</span>
+        <div className="mt-10 window-border rounded-[var(--radius)] overflow-hidden shadow-window bg-[hsl(var(--title-bar))]">
+          <div className="border-b-[3px] border-[var(--text-main)] px-4 py-3 flex items-center justify-between bg-white/40 backdrop-blur-sm">
+            <div className="flex gap-2">
+              <span className="w-3.5 h-3.5 rounded-full border-2 border-[var(--text-main)] bg-[var(--traffic-red)]" />
+              <span className="w-3.5 h-3.5 rounded-full border-2 border-[var(--text-main)] bg-[var(--traffic-yellow)]" />
+              <span className="w-3.5 h-3.5 rounded-full border-2 border-[var(--text-main)] bg-[var(--traffic-green)]" />
+            </div>
+            <span className="font-mono text-xs font-bold text-[var(--text-main)]">API launch — notify me</span>
           </div>
           <div className="p-5">
             {submitted ? (
-              <p className="font-mono text-sm text-sticker">Got it. We&apos;ll reach out.</p>
+              <p className="font-mono text-sm font-bold text-[var(--text-main)]">Got it. We&apos;ll reach out.</p>
             ) : (
               <div className="flex gap-3">
                 <div className="relative flex-1">
@@ -36,7 +40,7 @@ const Pricing = () => {
                 </div>
                 <button
                   onClick={() => email.includes("@") && setSubmitted(true)}
-                  className="border-2 border-border bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors rounded-full shrink-0"
+                  className="window-border bg-primary px-6 py-2.5 text-sm font-bold text-primary-foreground shadow-btn hover:-translate-y-0.5 active:translate-y-0 active:shadow-none transition-all rounded-[var(--radius)] shrink-0"
                 >
                   Notify
                 </button>

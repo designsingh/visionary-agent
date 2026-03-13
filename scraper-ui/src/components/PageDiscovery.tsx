@@ -48,9 +48,9 @@ const PageDiscovery = ({ domain, pages: initialPages, onExtract }: PageDiscovery
         {pages.map((page, i) => (
           <label
             key={page.path}
-            className={`flex cursor-pointer items-center gap-3 px-4 py-2.5 hover:bg-muted/30 transition-colors ${page.selected ? "bg-primary/5 border-l-4 border-l-sticker" : ""}`}
+            className={`flex cursor-pointer items-center gap-3 px-4 py-2.5 hover:bg-muted/30 transition-colors ${page.selected ? "bg-[var(--traffic-green)]/10 border-l-4 border-l-[var(--traffic-green)]" : ""}`}
           >
-            <button onClick={() => togglePage(i)} className="text-sticker shrink-0" type="button">
+            <button onClick={() => togglePage(i)} className="text-[var(--traffic-green)] shrink-0" type="button">
               {page.selected ? <CheckSquare className="h-4 w-4" /> : <Square className="h-4 w-4 text-muted-foreground" />}
             </button>
             <span className="font-mono text-xs text-foreground min-w-[80px]">{page.path}</span>
@@ -72,7 +72,7 @@ const PageDiscovery = ({ domain, pages: initialPages, onExtract }: PageDiscovery
                 onClick={() => toggleFormat(key)}
                 className={`flex items-center gap-1.5 border px-2.5 py-1 text-xs font-medium transition-all ${
                   formats[key]
-                    ? "border-sticker bg-sticker/15 text-sticker"
+                    ? "border-[var(--traffic-green)] bg-[var(--traffic-green)]/15 text-[var(--text-main)] font-bold"
                     : "border-border bg-card text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -87,7 +87,7 @@ const PageDiscovery = ({ domain, pages: initialPages, onExtract }: PageDiscovery
                 onClick={() => toggleFormat(key)}
                 className={`flex items-center gap-1.5 border px-2.5 py-1 text-xs font-medium transition-all ${
                   formats[key]
-                    ? "border-sticker bg-sticker/15 text-sticker"
+                    ? "border-[var(--traffic-green)] bg-[var(--traffic-green)]/15 text-[var(--text-main)] font-bold"
                     : "border-border bg-card text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -101,7 +101,7 @@ const PageDiscovery = ({ domain, pages: initialPages, onExtract }: PageDiscovery
             <button
               onClick={() => onExtract(pages.filter((p) => p.selected), selectedFormats)}
               disabled={!someSelected || selectedFormats.length === 0}
-              className="flex items-center gap-2 border-2 border-border bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50 rounded-full"
+              className="flex items-center gap-2 window-border bg-primary px-6 py-2.5 text-sm font-bold text-primary-foreground shadow-btn hover:-translate-y-0.5 active:translate-y-0 active:shadow-none transition-all disabled:opacity-50 rounded-[var(--radius)]"
             >
               Extract {selectedCount} page{selectedCount !== 1 ? "s" : ""}
             </button>

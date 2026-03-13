@@ -14,9 +14,14 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["'Inter'", "system-ui", "-apple-system", "sans-serif"],
-        display: ["'Inter'", "system-ui", "sans-serif"],
-        mono: ["'JetBrains Mono'", "'SF Mono'", "Consolas", "monospace"],
+        sans: ["'Space Grotesk'", "system-ui", "sans-serif"],
+        display: ["'Space Grotesk'", "system-ui", "sans-serif"],
+        mono: ["'Space Mono'", "'SF Mono'", "Consolas", "monospace"],
+      },
+      boxShadow: {
+        window: "6px 6px 0 0 var(--text-main)",
+        "window-hover": "8px 8px 0 0 var(--text-main)",
+        btn: "4px 4px 0 0 var(--text-main)",
       },
       colors: {
         border: "hsl(var(--border))",

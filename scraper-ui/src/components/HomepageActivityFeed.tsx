@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { FolderOpen } from "lucide-react";
 import WindowChrome from "./WindowChrome";
 
 const LOG_LINES = [
@@ -43,12 +44,21 @@ const HomepageActivityFeed = () => {
   }, []);
 
   return (
-    <WindowChrome title="Activity Log" variant="pink">
-      <div className="flex items-center gap-2 border-b border-border-muted px-3 py-2 bg-muted/30">
-        <span className="h-1.5 w-1.5 rounded-full bg-sticker animate-pulse" />
-        <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Live</span>
+    <div className="w-full">
+      <div className="flex items-center justify-between mb-6 border-b-[3px] border-[var(--text-main)] pb-4">
+        <h2 className="text-xl font-bold flex items-center gap-3 text-[var(--text-main)]">
+          <span className="w-9 h-9 rounded-lg bg-[var(--traffic-yellow)] border-2 border-[var(--text-main)] flex items-center justify-center">
+            <FolderOpen className="w-5 h-5 text-[var(--text-main)]" strokeWidth={2} />
+          </span>
+          <span>Recent Activity</span>
+        </h2>
       </div>
-      <div className="max-h-36 min-h-[7rem] overflow-y-auto p-3 font-mono text-xs bg-[hsl(0_0%_100%)]">
+      <WindowChrome title="Activity Log" variant="pink">
+      <div className="flex items-center gap-2 border-b-2 border-[var(--text-main)]/20 px-3 py-2 bg-white/40">
+        <span className="h-1.5 w-1.5 rounded-full bg-[var(--traffic-red)] animate-pulse" />
+        <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--text-main)] opacity-80">Live</span>
+      </div>
+      <div className="max-h-36 min-h-[7rem] overflow-y-auto p-4 font-mono text-xs bg-white/50">
         <div className="space-y-0.5">
           {lines.map((line, i) => (
             <div
@@ -58,12 +68,13 @@ const HomepageActivityFeed = () => {
               {line.text}
             </div>
           ))}
-          <div className="inline-flex items-center gap-0.5 mt-0.5 text-sticker">
+          <div className="inline-flex items-center gap-0.5 mt-0.5 text-[var(--text-main)]">
             <span className="animate-pulse">▋</span>
           </div>
         </div>
       </div>
-    </WindowChrome>
+      </WindowChrome>
+    </div>
   );
 };
 

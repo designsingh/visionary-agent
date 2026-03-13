@@ -18,16 +18,15 @@ const CrawlTimeline = ({ domain, foundUrls, extracting }: CrawlTimelineProps) =>
 
   return (
     <WindowChrome title={`${extracting ? "Extracting" : "Crawling"} — ${domain}`}>
-      <div className="flex items-center gap-2 border-b border-border-muted px-3 py-2 bg-muted/30">
-        <Loader2 className="h-3.5 w-3.5 animate-spin text-primary shrink-0" />
+      <div className="flex items-center gap-2 border-b-2 border-[var(--text-main)]/20 px-3 py-2 bg-white/40">
+        <Loader2 className="h-3.5 w-3.5 animate-spin text-[var(--text-main)] shrink-0" />
       </div>
 
-      {/* Terminal accent — light panel, mono log lines */}
       <div
         ref={scrollRef}
-        className="max-h-48 overflow-y-auto p-4 font-mono text-xs bg-muted/30 min-h-[8rem]"
+        className="max-h-48 overflow-y-auto p-4 font-mono text-xs bg-white/50 min-h-[8rem]"
       >
-        <div className="space-y-0.5 text-muted-foreground">
+        <div className="space-y-0.5 text-[var(--text-main)] opacity-90">
           <div>$ pagegrab {domain}</div>
           <div>→ Starting crawl…</div>
 
@@ -40,12 +39,12 @@ const CrawlTimeline = ({ domain, foundUrls, extracting }: CrawlTimelineProps) =>
             return (
               <div
                 key={`${u.url}-${i}`}
-                className="animate-fade-in-up text-foreground/90"
+                className="animate-fade-in-up"
                 style={{ animationDelay: `${Math.min(i, 5) * 50}ms` }}
               >
-                → <span className="text-primary">{path}</span>
+                → <span className="text-[var(--traffic-green)] font-medium">{path}</span>
                 {u.title && (
-                  <span className="text-muted-foreground ml-1 truncate max-w-[180px] inline-block align-bottom" title={u.title}>
+                  <span className="opacity-80 ml-1 truncate max-w-[180px] inline-block align-bottom" title={u.title}>
                     {u.title}
                   </span>
                 )}
@@ -54,7 +53,7 @@ const CrawlTimeline = ({ domain, foundUrls, extracting }: CrawlTimelineProps) =>
           })}
 
           {extracting && foundUrls.length > 0 && (
-            <div className="pt-1 text-muted-foreground">→ Extracting…</div>
+            <div className="pt-1 opacity-80">→ Extracting…</div>
           )}
 
           {!extracting && foundUrls.length === 0 && (
@@ -63,10 +62,9 @@ const CrawlTimeline = ({ domain, foundUrls, extracting }: CrawlTimelineProps) =>
         </div>
       </div>
 
-      {/* Progress bar */}
-      <div className="h-1 w-full overflow-hidden bg-muted/50">
+      <div className="h-1.5 w-full overflow-hidden bg-[var(--text-main)]/10">
         <div
-          className="h-full bg-primary/80 transition-all duration-500 ease-out"
+          className="h-full bg-[var(--traffic-green)] transition-all duration-500 ease-out"
           style={{
             width: extracting ? "100%" : foundUrls.length > 0 ? `${Math.min(70 + foundUrls.length * 2, 95)}%` : "30%",
           }}

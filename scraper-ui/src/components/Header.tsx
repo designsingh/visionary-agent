@@ -1,4 +1,4 @@
-import { Crosshair } from "lucide-react";
+import { Layout } from "lucide-react";
 
 const Header = () => {
   const scrollToHowItWorks = () => {
@@ -6,22 +6,21 @@ const Header = () => {
   };
 
   return (
-    <header className="relative z-20 border-b-2 border-border bg-card px-4 py-3 sm:px-6">
-      <div className="mx-auto flex max-w-5xl items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg border-2 border-border bg-primary/10">
-            <Crosshair className="h-4 w-4 text-primary" strokeWidth={2} />
-          </div>
-          <span className="font-semibold text-base tracking-tight text-foreground">PageGrab</span>
+    <nav className="relative z-20 w-full px-6 py-5 flex justify-between items-center max-w-7xl mx-auto border-b-[3px] border-[var(--text-main)] bg-background">
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 bg-white window-border flex items-center justify-center shadow-btn rotate-[-3deg] hover:rotate-0 transition-transform cursor-pointer rounded-[var(--radius)]">
+          <Layout className="h-5 w-5 text-[var(--text-main)]" strokeWidth={2} />
         </div>
-        <button
-          onClick={scrollToHowItWorks}
-          className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium"
-        >
-          How it works
-        </button>
+        <span className="font-bold text-2xl tracking-tight text-[var(--text-main)]">PageGrab</span>
       </div>
-    </header>
+      <button
+        onClick={scrollToHowItWorks}
+        className="font-bold hover:underline flex items-center gap-2 px-4 py-2 window-border bg-white shadow-btn hover:-translate-y-0.5 active:translate-y-0 active:shadow-none transition-all text-sm rounded-[var(--radius)]"
+      >
+        How it works
+        <span className="text-[var(--text-main)]" aria-hidden>→</span>
+      </button>
+    </nav>
   );
 };
 

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { MousePointer2 } from "lucide-react";
 import Header from "@/components/Header";
 import UrlInput from "@/components/UrlInput";
 import CrawlTimeline from "@/components/CrawlTimeline";
@@ -152,25 +153,23 @@ const Index = () => {
     <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
       <Header />
 
-      <main className="flex-1 px-4 py-12 sm:px-6 relative z-10">
-        <div className="mx-auto max-w-3xl">
-          {/* Hero — simple, utility-first + 90s Hello */}
+      <main className="flex-1 w-full max-w-5xl mx-auto px-6 pt-12 lg:pt-20 flex flex-col items-center relative z-10">
+        <div className="w-full max-w-3xl">
           {step === "input" && (
-            <div className="mb-10 relative">
-              <div className="absolute -top-1 right-0 flex items-center gap-1.5 px-3 py-1.5 border-2 border-border bg-sticker shadow-card rounded-full">
-                <span className="font-mono text-xs font-medium text-white">Hello!</span>
-              </div>
-              <p className="font-mono text-xs text-muted-foreground mb-2">URL → Screenshot · Markdown · HTML</p>
-              <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">
+            <div className="text-center mb-12 relative">
+              <h1 className="text-4xl md:text-6xl font-bold tracking-tighter mb-6 relative inline-block text-[var(--text-main)]">
                 Grab any webpage.
+                <MousePointer2 className="absolute -right-6 md:-right-8 bottom-1 w-8 h-8 md:w-9 md:h-9 opacity-80 rotate-12 text-[var(--text-main)]" aria-hidden />
               </h1>
-              <p className="mt-3 text-sm text-muted-foreground max-w-lg leading-relaxed">
-                Paste a URL, select pages, download. No sign-up.
+              <p className="text-base md:text-lg max-w-2xl mx-auto font-medium opacity-90 leading-relaxed text-[var(--text-main)]">
+                Capture, archive, and analyze — rendering perfectly.
+                <br className="hidden md:block" />
+                A professional tool built with internet-native charm.
               </p>
             </div>
           )}
 
-          <div className="space-y-5">
+          <div className="space-y-6">
             {(step === "input" || step === "crawling" || step === "discovery") && (
               <UrlInput onSubmit={handleSubmit} isLoading={step === "crawling"} />
             )}
@@ -191,7 +190,7 @@ const Index = () => {
               <>
                 <button
                   onClick={handleReset}
-                  className="font-mono text-xs text-accent hover:text-accent/80 transition-colors"
+                  className="font-bold text-sm text-[var(--text-main)] hover:underline transition-colors"
                 >
                   ← Grab another URL
                 </button>
@@ -200,9 +199,9 @@ const Index = () => {
             )}
           </div>
 
-          <p className="text-center font-mono text-xs text-muted-foreground mt-12">
+          <p className="text-center font-medium text-sm text-[var(--text-main)] opacity-90 mt-12">
             Built by a designer tired of copy-pasting screenshots.{' '}
-            <a href="https://linkedin.com/in/preetarjun" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
+            <a href="https://linkedin.com/in/preetarjun" target="_blank" rel="noopener noreferrer" className="font-bold hover:underline">
               Preeta
             </a>
           </p>

@@ -1,10 +1,10 @@
 const Footer = () => (
-  <footer className="relative z-10 border-t-2 border-border bg-card px-4 py-8 sm:px-6">
+  <footer className="relative z-10 border-t-[3px] border-[var(--text-main)] bg-background px-6 py-8">
     <div className="mx-auto flex max-w-5xl flex-col items-center gap-4 sm:flex-row sm:justify-between">
-      <span className="font-mono text-sm font-medium text-foreground">PageGrab</span>
-      <div className="flex gap-8 font-mono text-sm">
-        <a href="#" className="text-muted-foreground hover:text-primary transition-colors">Twitter</a>
-        <a href="#" className="text-muted-foreground hover:text-primary transition-colors">GitHub</a>
+      <span className="font-bold text-sm text-[var(--text-main)]">PageGrab</span>
+      <div className="flex gap-8 font-medium text-sm">
+        <a href="#" className="text-[var(--text-main)] opacity-80 hover:opacity-100 transition-opacity">Twitter</a>
+        <a href="#" className="text-[var(--text-main)] opacity-80 hover:opacity-100 transition-opacity">GitHub</a>
       </div>
     </div>
   </footer>
