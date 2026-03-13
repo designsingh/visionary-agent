@@ -70,8 +70,13 @@ const BRAIN_JSON_SCHEMA = {
 
 /**
  * Run the Brain: screenshot buffer + URL → Gemini → structured JSON brief.
+ * Optionally pass crawlMarkdown from /crawl for full site content.
  */
-export async function designDirector(screenshotBuffer: Buffer, url: string): Promise<GeminiBrainOutput> {
+export async function designDirector(
+  screenshotBuffer: Buffer,
+  url: string,
+  crawlMarkdown?: string
+): Promise<GeminiBrainOutput> {
   const apiKey = process.env.GEMINI_API_KEY;
   const model = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 
@@ -82,10 +87,16 @@ export async function designDirector(screenshotBuffer: Buffer, url: string): Pro
   const ai = new GoogleGenAI({ apiKey });
   const imageBase64 = screenshotBuffer.toString("base64");
 
+  let promptText = `${DESIGN_DIRECTOR_PROMPT}\n\nURL of the site: ${url}`;
+  if (crawlMarkdown && crawlMarkdown.length > 0) {
+    const truncated = crawlMarkdown.length > 40000 ? crawlMarkdown.slice(0, 40000) + "\n\n[... truncated for length ...]" : crawlMarkdown;
+    promptText += `\n\n---\nCRAWLED SITE CONTENT (markdown from multiple pages — use this to understand the full hierarchy and all copy):\n\n${truncated}`;
+  }
+
   const response = await ai.models.generateContent({
     model,
     contents: [
-      { text: `${DESIGN_DIRECTOR_PROMPT}\n\nURL of the site: ${url}` },
+      { text: promptText },
       {
         inlineData: {
           mimeType: "image/png",

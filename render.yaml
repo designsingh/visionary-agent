@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: visionary-api
+    runtime: node
+    buildCommand: npm install && npm run build:scraper
+    startCommand: npx tsx src/server.ts
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      - key: CLOUDFLARE_ACCOUNT_ID
+        sync: false
+      - key: CLOUDFLARE_API_TOKEN
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: V0_API_KEY
+        sync: false

@@ -8,13 +8,14 @@ import { mkdir, writeFile } from "fs/promises";
 import { join } from "path";
 import sharp from "sharp";
 import { captureScreenshot } from "./screenshot.js";
+import { runCrawl, formatCrawlForBrain } from "./crawl.js";
 import { designDirector, type GeminiBrainOutput } from "./brain.js";
 import { v0 } from "v0-sdk";
 
 const OUTPUT_DIR = "output";
 
 export interface PipelineStep {
-  step: "capture" | "brain" | "build" | "comparison" | "done" | "error";
+  step: "crawl" | "capture" | "brain" | "build" | "comparison" | "done" | "error";
   message: string;
   data?: Record<string, unknown>;
 }
@@ -99,30 +100,46 @@ export async function generatePitch(legacyUrl: string, onStep: StepCallback): Pr
   const t = ts();
   await mkdir(OUTPUT_DIR, { recursive: true });
 
-  // ── STEP 1: CAPTURE ──
-  onStep({ step: "capture", message: "Capturing screenshot of the original site…" });
+  // ── STEP 0: CRAWL (runs in parallel with CAPTURE) ──
+  onStep({ step: "crawl", message: "Crawling site and capturing screenshot…" });
   let screenshotBuffer: Buffer;
-  try {
-    screenshotBuffer = await captureScreenshot(legacyUrl, {
-      width: 1280, height: 720, waitUntil: "networkidle0",
-    });
-    const origFile = `original-${host}-${t}.png`;
-    await writeFile(join(OUTPUT_DIR, origFile), screenshotBuffer);
+  let crawlMarkdown: string | undefined;
+
+  const [crawlResult, captureResult] = await Promise.allSettled([
+    runCrawl(legacyUrl, { limit: 15, depth: 2 }),
+    captureScreenshot(legacyUrl, { width: 1280, height: 720, waitUntil: "networkidle0" }),
+  ]);
+
+  if (crawlResult.status === "fulfilled" && crawlResult.value?.records?.length) {
+    crawlMarkdown = formatCrawlForBrain(crawlResult.value.records);
     onStep({
-      step: "capture",
-      message: "Original site captured.",
-      data: { imageUrl: `/output/${origFile}` },
+      step: "crawl",
+      message: `Crawl complete (${crawlResult.value.records.length} pages).`,
+      data: { pageCount: crawlResult.value.records.length },
     });
-  } catch (e) {
-    onStep({ step: "error", message: `Capture failed: ${e instanceof Error ? e.message : e}` });
+  } else {
+    onStep({ step: "crawl", message: "Crawl skipped (using screenshot only)." });
+  }
+
+  if (captureResult.status === "rejected") {
+    onStep({ step: "error", message: `Capture failed: ${captureResult.reason?.message ?? captureResult.reason}` });
     return;
   }
 
+  screenshotBuffer = captureResult.value;
+  const origFile = `original-${host}-${t}.png`;
+  await writeFile(join(OUTPUT_DIR, origFile), screenshotBuffer);
+  onStep({
+    step: "capture",
+    message: "Original site captured.",
+    data: { imageUrl: `/output/${origFile}` },
+  });
+
   // ── STEP 2: BRAIN ──
-  onStep({ step: "brain", message: "Gemini is analyzing the design and writing your pitch…" });
+  onStep({ step: "brain", message: "Gemini is analyzing the design and content…" });
   let brain: GeminiBrainOutput;
   try {
-    brain = await designDirector(screenshotBuffer, legacyUrl);
+    brain = await designDirector(screenshotBuffer, legacyUrl, crawlMarkdown);
     onStep({
       step: "brain",
       message: "Design brief ready.",

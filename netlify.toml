@@ -1,0 +1,9 @@
+[build]
+  command = "npm run build:scraper"
+  publish = "public"
+
+# SPA: all routes serve index.html
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

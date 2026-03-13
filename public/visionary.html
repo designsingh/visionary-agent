@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Visionary – Design Scout</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #09090b;
+      --surface: #131316;
+      --surface2: #1a1a1f;
+      --border: #27272a;
+      --text: #fafafa;
+      --muted: #71717a;
+      --accent: #6ee7b7;
+      --accent-dim: #2d9d78;
+      --error: #f87171;
+      --blue: #60a5fa;
+    }
+    * { box-sizing: border-box; margin: 0; }
+    body {
+      font-family: "DM Sans", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 1.25rem 1.5rem;
+    }
+    header h1 { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; }
+    header p { color: var(--muted); font-size: 0.85rem; margin-top: 0.15rem; }
+
+    /* Main */
+    .main { max-width: 1000px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+    /* Input bar */
+    .input-bar {
+      display: flex; gap: 0.75rem;
+      padding: 1.25rem; border-radius: 12px;
+      background: var(--surface); border: 1px solid var(--border);
+    }
+    .input-bar input {
+      flex: 1; padding: 0.65rem 0.85rem; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--bg); color: var(--text);
+      font-family: inherit; font-size: 0.95rem;
+    }
+    .input-bar input:focus { outline: none; border-color: var(--accent-dim); box-shadow: 0 0 0 2px rgba(45,157,120,0.15); }
+    .input-bar input::placeholder { color: var(--muted); }
+    .input-bar button {
+      padding: 0.65rem 1.5rem; border: none; border-radius: 8px;
+      background: var(--accent); color: var(--bg);
+      font-family: inherit; font-size: 0.95rem; font-weight: 600; cursor: pointer;
+      white-space: nowrap;
+    }
+    .input-bar button:hover { background: #5dd9a8; }
+    .input-bar button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Pipeline steps */
+    .pipeline { margin-top: 2rem; }
+    .step {
+      position: relative;
+      padding: 1.25rem 1.25rem 1.25rem 3rem;
+      border-left: 2px solid var(--border);
+      margin-left: 0.75rem;
+    }
+    .step:last-child { border-left-color: transparent; }
+    .step .dot {
+      position: absolute; left: -7px; top: 1.35rem;
+      width: 12px; height: 12px; border-radius: 50%;
+      background: var(--border); border: 2px solid var(--bg);
+    }
+    .step.active .dot { background: var(--accent); box-shadow: 0 0 8px rgba(110,231,183,0.4); }
+    .step.done .dot { background: var(--accent); }
+    .step.error .dot { background: var(--error); }
+    .step.pending .dot { background: var(--border); }
+    .step-title {
+      font-weight: 600; font-size: 0.9rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .step.pending .step-title { color: var(--muted); }
+    .step.active .step-title { color: var(--accent); }
+    .step.done .step-title { color: var(--text); }
+    .step.error .step-title { color: var(--error); }
+    .step-status {
+      font-size: 0.82rem; color: var(--muted); margin-top: 0.25rem;
+    }
+    .spinner {
+      display: inline-block; width: 14px; height: 14px;
+      border: 2px solid var(--muted); border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Content cards within steps */
+    .step-content {
+      margin-top: 0.75rem; border-radius: 10px;
+      overflow: hidden; border: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .step-content img {
+      width: 100%; display: block; background: var(--bg);
+    }
+
+    /* Brain card */
+    .brain-card {
+      margin-top: 0.75rem; padding: 1rem 1.25rem; border-radius: 10px;
+      background: var(--surface); border: 1px solid var(--border);
+    }
+    .brain-card h3 {
+      font-size: 1.1rem; font-weight: 700; margin-bottom: 0.15rem;
+    }
+    .brain-card .tagline { color: var(--muted); font-size: 0.9rem; margin-bottom: 0.75rem; }
+    .brain-card .color-chip {
+      display: inline-block; width: 20px; height: 20px; border-radius: 4px;
+      vertical-align: middle; margin-right: 0.4rem; border: 1px solid var(--border);
+    }
+    .brain-card .services { margin-top: 0.5rem; }
+    .brain-card .service {
+      padding: 0.5rem 0; border-top: 1px solid var(--border);
+    }
+    .brain-card .service:first-child { border-top: none; }
+    .brain-card .service strong { font-size: 0.88rem; }
+    .brain-card .service p { font-size: 0.82rem; color: var(--muted); margin-top: 0.1rem; }
+
+    /* v0 links */
+    .v0-links {
+      margin-top: 0.75rem; display: flex; gap: 0.75rem; flex-wrap: wrap;
+    }
+    .v0-links a {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.88rem;
+      text-decoration: none; font-weight: 500;
+      border: 1px solid var(--border); color: var(--text);
+      background: var(--surface);
+    }
+    .v0-links a:hover { border-color: var(--accent-dim); }
+    .v0-links a.primary { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+    .v0-links a.primary:hover { background: #5dd9a8; }
+
+    /* Comparison full width */
+    .comparison-wrap {
+      margin-top: 0.75rem; border-radius: 10px; overflow: hidden;
+      border: 1px solid var(--border); background: var(--bg);
+    }
+    .comparison-wrap img { width: 100%; display: block; }
+
+    /* Hidden */
+    .hidden { display: none !important; }
+
+    /* Error inline */
+    .error-msg {
+      margin-top: 0.5rem; padding: 0.75rem 1rem; border-radius: 8px;
+      background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.25);
+      color: var(--error); font-size: 0.85rem;
+      font-family: "JetBrains Mono", monospace; word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Visionary</h1>
+    <p>Enter a URL. We capture it, analyze the brand, redesign it, and show you the before & after. <a href="/" style="color:var(--accent);">← Scraper</a></p>
+  </header>
+
+  <div class="main">
+    <div class="input-bar">
+      <input id="url" type="url" placeholder="https://priorityplumbing.ca" />
+      <button id="go">Generate pitch</button>
+    </div>
+
+    <div id="pipeline" class="pipeline hidden">
+      <!-- Step 0: Crawl -->
+      <div class="step pending" id="s-crawl">
+        <div class="dot"></div>
+        <div class="step-title">0. Crawl site</div>
+        <div class="step-status" id="s-crawl-status">Waiting…</div>
+      </div>
+
+      <!-- Step 1: Capture -->
+      <div class="step pending" id="s-capture">
+        <div class="dot"></div>
+        <div class="step-title">1. Capture original site</div>
+        <div class="step-status" id="s-capture-status">Waiting…</div>
+        <div class="step-content hidden" id="s-capture-img"></div>
+      </div>
+
+      <!-- Step 2: Brain -->
+      <div class="step pending" id="s-brain">
+        <div class="dot"></div>
+        <div class="step-title">2. Design Director (Gemini)</div>
+        <div class="step-status" id="s-brain-status">Waiting…</div>
+        <div id="s-brain-card" class="hidden"></div>
+      </div>
+
+      <!-- Step 3: Build -->
+      <div class="step pending" id="s-build">
+        <div class="dot"></div>
+        <div class="step-title">3. Build redesign (v0)</div>
+        <div class="step-status" id="s-build-status">Waiting…</div>
+        <div id="s-build-links" class="hidden"></div>
+      </div>
+
+      <!-- Step 4: Comparison -->
+      <div class="step pending" id="s-comparison">
+        <div class="dot"></div>
+        <div class="step-title">4. Before & After</div>
+        <div class="step-status" id="s-comparison-status">Waiting…</div>
+        <div id="s-comparison-img" class="hidden"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const urlInput = document.getElementById("url");
+    const goBtn = document.getElementById("go");
+    const pipeline = document.getElementById("pipeline");
+
+    function setStep(id, state, statusHtml) {
+      const el = document.getElementById("s-" + id);
+      el.className = "step " + state;
+      document.getElementById("s-" + id + "-status").innerHTML = statusHtml;
+    }
+
+    function resetPipeline() {
+      pipeline.classList.remove("hidden");
+      ["crawl", "capture", "brain", "build", "comparison"].forEach((id) => {
+        setStep(id, "pending", "Waiting\u2026");
+        const extras = document.querySelectorAll("#s-" + id + " .step-content, #s-" + id + "-card, #s-" + id + "-links, #s-" + id + "-img");
+        extras.forEach((e) => { e.classList.add("hidden"); e.innerHTML = ""; });
+      });
+    }
+
+    goBtn.addEventListener("click", () => {
+      const url = urlInput.value.trim();
+      if (!url || !url.startsWith("http")) return;
+      goBtn.disabled = true;
+      resetPipeline();
+
+      const evtUrl = "/api/generate-pitch?url=" + encodeURIComponent(url);
+      const source = new EventSource(evtUrl);
+
+      source.onmessage = (evt) => {
+        const d = JSON.parse(evt.data);
+
+        if (d.step === "crawl") {
+          if (d.data?.pageCount) {
+            setStep("crawl", "done", "Crawled " + d.data.pageCount + " pages.");
+          } else if (d.message && d.message.includes("skipped")) {
+            setStep("crawl", "done", "Crawl skipped (using screenshot only).");
+          } else {
+            setStep("crawl", "active", '<span class="spinner"></span> ' + esc(d.message));
+          }
+        }
+
+        if (d.step === "capture") {
+          if (d.data?.imageUrl) {
+            setStep("capture", "done", "Original site captured.");
+            const wrap = document.getElementById("s-capture-img");
+            wrap.classList.remove("hidden");
+            wrap.innerHTML = '<img src="' + d.data.imageUrl + '" alt="Original site" />';
+            setStep("brain", "active", '<span class="spinner"></span> Analyzing with Gemini\u2026');
+          } else {
+            setStep("capture", "active", '<span class="spinner"></span> ' + esc(d.message));
+          }
+        }
+
+        if (d.step === "brain") {
+          if (d.data?.brain) {
+            setStep("brain", "done", "Design brief ready.");
+            const b = d.data.brain;
+            const card = document.getElementById("s-brain-card");
+            card.classList.remove("hidden");
+            card.innerHTML = `
+              <div class="brain-card">
+                <h3>${esc(b.heroH1)}</h3>
+                <div class="tagline">${esc(b.heroSubtext)}</div>
+                <div><span class="color-chip" style="background:${esc(b.primaryColorHex)}"></span><code>${esc(b.primaryColorHex)}</code>${b.secondaryColorHex ? ` <span class="color-chip" style="background:${esc(b.secondaryColorHex)}"></span><code>${esc(b.secondaryColorHex)}</code>` : ""}</div>
+                <div class="services">
+                  ${b.services.map(s => `<div class="service"><strong>${esc(s.title)}</strong><p>${esc(s.description)}</p></div>`).join("")}
+                </div>
+              </div>`;
+            setStep("build", "active", '<span class="spinner"></span> v0 is building the redesign\u2026');
+          } else {
+            setStep("brain", "active", '<span class="spinner"></span> ' + esc(d.message));
+          }
+        }
+
+        if (d.step === "build") {
+          if (d.data?.v0WebUrl) {
+            setStep("build", "done", "Redesign generated.");
+            const links = document.getElementById("s-build-links");
+            links.classList.remove("hidden");
+            let html = '<div class="v0-links">';
+            if (d.data.v0DemoUrl) html += '<a class="primary" href="' + d.data.v0DemoUrl + '" target="_blank" rel="noopener">Preview redesign &rarr;</a>';
+            html += '<a href="' + d.data.v0WebUrl + '" target="_blank" rel="noopener">Edit in v0</a>';
+            html += '</div>';
+            links.innerHTML = html;
+            if (d.data.v0DemoUrl) {
+              setStep("comparison", "active", '<span class="spinner"></span> Capturing the redesign for side-by-side\u2026');
+            } else {
+              setStep("comparison", "done", "No preview URL yet — open the v0 link above to see it.");
+            }
+          } else {
+            setStep("build", "active", '<span class="spinner"></span> ' + esc(d.message));
+          }
+        }
+
+        if (d.step === "comparison") {
+          if (d.data?.comparisonUrl) {
+            setStep("comparison", "done", "Side-by-side comparison ready.");
+            const wrap = document.getElementById("s-comparison-img");
+            wrap.classList.remove("hidden");
+            wrap.innerHTML = '<div class="comparison-wrap"><img src="' + d.data.comparisonUrl + '" alt="Before vs After" /></div>';
+          } else {
+            setStep("comparison", "active", esc(d.message));
+          }
+        }
+
+        if (d.step === "error") {
+          const active = document.querySelector(".step.active");
+          if (active) {
+            const id = active.id.replace("s-", "");
+            setStep(id, "error", '<div class="error-msg">' + esc(d.message) + '</div>');
+          }
+        }
+
+        if (d.step === "done") {
+          source.close();
+          goBtn.disabled = false;
+        }
+      };
+
+      source.onerror = () => {
+        source.close();
+        goBtn.disabled = false;
+      };
+    });
+
+    function esc(s) {
+      const d = document.createElement("div");
+      d.textContent = s || "";
+      return d.innerHTML;
+    }
+  </script>
+</body>
+</html>
