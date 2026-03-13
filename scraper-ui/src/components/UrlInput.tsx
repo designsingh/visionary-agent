@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Globe, Camera, ChevronLeft, ChevronRight } from "lucide-react";
 import WindowChrome from "./WindowChrome";
 
@@ -16,6 +16,10 @@ const EXAMPLE_URLS = [
 const UrlInput = ({ onSubmit, isLoading }: UrlInputProps) => {
   const [url, setUrl] = useState("");
   const [error, setError] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
 
   const handleSubmit = () => {
     const trimmed = url.trim();
@@ -42,6 +46,7 @@ const UrlInput = ({ onSubmit, isLoading }: UrlInputProps) => {
                 <Globe className="h-5 w-5 text-[var(--text-main)]" strokeWidth={2} />
               </div>
               <input
+                ref={inputRef}
                 type="text"
                 value={url}
                 onChange={(e) => { setUrl(e.target.value); setError(""); }}

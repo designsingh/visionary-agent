@@ -11,7 +11,7 @@ const UseCases = () => {
   ];
 
   return (
-    <section className="relative z-10 border-t-[3px] border-[var(--text-main)] px-6 py-20 sm:px-6 bg-muted/30">
+    <section className="relative z-10 px-6 py-20 sm:px-6 bg-muted/30">
       <div className="mx-auto max-w-5xl">
         <div className="mb-12 border-b-[3px] border-[var(--text-main)] pb-4">
           <h2 className="text-2xl font-bold text-[var(--text-main)]">Results, not API docs</h2>

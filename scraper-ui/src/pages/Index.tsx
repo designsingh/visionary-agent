@@ -8,7 +8,6 @@ import PageDiscovery, { type DiscoveredPage } from "@/components/PageDiscovery";
 import Results from "@/components/Results";
 import HowItWorks from "@/components/HowItWorks";
 import UseCases from "@/components/UseCases";
-import Pricing from "@/components/Pricing";
 import Footer from "@/components/Footer";
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "";
@@ -30,12 +29,16 @@ const Index = () => {
   const [foundUrls, setFoundUrls] = useState<{ url: string; title?: string }[]>([]);
 
   const handleSubmit = (url: string) => {
+    let origin = "";
     try {
-      setDomain(new URL(url).hostname);
-      setBaseUrl(new URL(url).origin);
+      const parsed = new URL(url.startsWith("http") ? url : `https://${url}`);
+      setDomain(parsed.hostname);
+      origin = parsed.origin;
+      setBaseUrl(origin);
     } catch {
       setDomain(url);
-      setBaseUrl(url.startsWith("http") ? url : `https://${url}`);
+      origin = url.startsWith("http") ? url : `https://${url}`;
+      setBaseUrl(origin);
     }
     setError("");
     setFoundUrls([]);
@@ -54,7 +57,17 @@ const Index = () => {
     evt.addEventListener("done", (e) => {
       try {
         const { pages, records } = JSON.parse((e as MessageEvent).data);
-        setDiscoveredPages(pages || []);
+        const pageList = pages || [];
+        setFoundUrls((prev) => {
+          if (pageList.length > 0) {
+            return pageList.map((p: { url?: string; path?: string; title?: string }) => ({
+              url: p.url || origin + (p.path || ""),
+              title: p.title,
+            }));
+          }
+          return prev;
+        });
+        setDiscoveredPages(pageList);
         setCrawlRecords(records || []);
         setStep("discovery");
       } catch {}
@@ -153,64 +166,109 @@ const Index = () => {
     <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
       <Header />
 
-      <main className="flex-1 w-full max-w-5xl mx-auto px-6 pt-12 lg:pt-20 flex flex-col items-center relative z-10">
-        <div className="w-full max-w-3xl">
-          {step === "input" && (
-            <div className="text-center mb-12 relative">
+      <main className="flex-1 w-full max-w-5xl mx-auto px-6 pt-8 lg:pt-12 flex flex-col items-center relative z-10">
+        {/* Step 1: URL entry — hero + input + activity */}
+        {step === "input" && (
+          <div className="w-full max-w-3xl">
+            <div className="text-center mb-10 relative">
               <h1 className="text-4xl md:text-6xl font-bold tracking-tighter mb-6 relative inline-block text-[var(--text-main)]">
                 Grab any webpage.
                 <MousePointer2 className="absolute -right-6 md:-right-8 bottom-1 w-8 h-8 md:w-9 md:h-9 opacity-80 rotate-12 text-[var(--text-main)]" aria-hidden />
               </h1>
               <p className="text-base md:text-lg max-w-2xl mx-auto font-medium opacity-90 leading-relaxed text-[var(--text-main)]">
                 Capture, archive, and analyze — rendering perfectly.
-                <br className="hidden md:block" />
-                A professional tool built with internet-native charm.
+                <br />
+                Built with internet-native charm.
               </p>
             </div>
-          )}
+            <div className="space-y-10">
+              <UrlInput onSubmit={handleSubmit} isLoading={false} />
+              {error && (
+                <div className="rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                  {error}
+                </div>
+              )}
+              <HomepageActivityFeed />
+            </div>
+            <p className="text-center font-medium text-sm text-[var(--text-main)] opacity-90 mt-16">
+              <a href="https://linkedin.com/in/preetarjun" target="_blank" rel="noopener noreferrer" className="hover:underline">
+                Built by a designer tired of copy-pasting screenshots.
+              </a>
+            </p>
+          </div>
+        )}
 
-          <div className="space-y-6">
-            {(step === "input" || step === "crawling" || step === "discovery") && (
-              <UrlInput onSubmit={handleSubmit} isLoading={step === "crawling"} />
-            )}
+        {/* Step 2a: Crawl in progress — dedicated view */}
+        {(step === "crawling" || step === "extracting") && (
+          <div className="w-full max-w-3xl space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold text-[var(--text-main)]">
+                {step === "extracting" ? "Extracting content…" : `Discovering pages on ${domain}`}
+              </h2>
+              <button
+                onClick={handleReset}
+                className="font-bold text-sm text-[var(--text-main)] hover:underline transition-colors"
+              >
+                ← Start over
+              </button>
+            </div>
+            <CrawlTimeline domain={domain} foundUrls={foundUrls} extracting={step === "extracting"} extractingTotal={step === "extracting" ? resultPages.length : 0} />
+          </div>
+        )}
 
-            {step === "input" && <HomepageActivityFeed />}
-
+        {/* Step 2b: Select pages & formats — dedicated view */}
+        {step === "discovery" && (
+          <div className="w-full max-w-6xl space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold text-[var(--text-main)]">
+                Select pages to grab from {domain}
+              </h2>
+              <button
+                onClick={handleReset}
+                className="font-bold text-sm text-[var(--text-main)] hover:underline transition-colors"
+              >
+                ← Start over
+              </button>
+            </div>
             {error && (
               <div className="rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive">
                 {error}
               </div>
             )}
-
-            {step === "crawling" && <CrawlTimeline domain={domain} foundUrls={foundUrls} />}
-            {step === "discovery" && <PageDiscovery domain={domain} pages={discoveredPages} onExtract={handleExtract} />}
-            {step === "extracting" && <CrawlTimeline domain={domain} foundUrls={foundUrls} extracting />}
-
-            {step === "results" && (
-              <>
-                <button
-                  onClick={handleReset}
-                  className="font-bold text-sm text-[var(--text-main)] hover:underline transition-colors"
-                >
-                  ← Grab another URL
-                </button>
-                <Results pages={resultPages} formats={resultFormats} pageContent={pageContent} />
-              </>
-            )}
+            <PageDiscovery domain={domain} pages={discoveredPages} onExtract={handleExtract} />
           </div>
+        )}
 
-          <p className="text-center font-medium text-sm text-[var(--text-main)] opacity-90 mt-12">
-            Built by a designer tired of copy-pasting screenshots.{' '}
-            <a href="https://linkedin.com/in/preetarjun" target="_blank" rel="noopener noreferrer" className="font-bold hover:underline">
-              Preeta
-            </a>
-          </p>
-        </div>
+        {/* Step 3: Results — dedicated view */}
+        {step === "results" && (
+          <div className="w-full max-w-6xl space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold text-[var(--text-main)]">
+                Your files are ready
+              </h2>
+              <button
+                onClick={handleReset}
+                className="font-bold text-sm text-[var(--text-main)] hover:underline transition-colors"
+              >
+                ← Grab another URL
+              </button>
+            </div>
+            {error && (
+              <div className="rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                {error}
+              </div>
+            )}
+            <Results domain={domain} pages={resultPages} formats={resultFormats} pageContent={pageContent} />
+          </div>
+        )}
       </main>
 
-      <HowItWorks />
-      <UseCases />
-      <Pricing />
+      {step === "input" && (
+        <>
+          <HowItWorks />
+          <UseCases />
+        </>
+      )}
       <Footer />
     </div>
   );

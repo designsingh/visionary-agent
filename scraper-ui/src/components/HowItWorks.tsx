@@ -9,7 +9,7 @@ const HowItWorks = () => {
 
   const cardColors = ["bg-[hsl(var(--card-1))]", "bg-[hsl(var(--card-2))]", "bg-[hsl(var(--card-3))]"];
   return (
-    <section id="how-it-works" className="relative z-10 border-t-[3px] border-[var(--text-main)] px-6 py-20 sm:px-6 bg-background">
+    <section id="how-it-works" className="relative z-10 px-6 py-20 sm:px-6 bg-background">
       <div className="mx-auto max-w-5xl">
         <div className="mb-12 border-b-[3px] border-[var(--text-main)] pb-4">
           <h2 className="text-2xl font-bold text-[var(--text-main)]">How it works</h2>

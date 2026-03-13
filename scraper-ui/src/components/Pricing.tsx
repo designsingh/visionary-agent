@@ -6,7 +6,7 @@ const Pricing = () => {
   const [submitted, setSubmitted] = useState(false);
 
   return (
-    <section className="relative z-10 border-t-[3px] border-[var(--text-main)] px-6 py-20 bg-background">
+    <section className="relative z-10 px-6 py-20 bg-background">
       <div className="mx-auto max-w-xl">
         <p className="font-mono text-xs text-[var(--text-main)] opacity-70 uppercase tracking-wider mb-2 text-center">Pricing</p>
         <h2 className="text-2xl font-bold text-[var(--text-main)] text-center">Free</h2>

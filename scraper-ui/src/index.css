@@ -7,11 +7,21 @@
 
 @layer base {
   :root {
-    /* Variant default theme: navy, terracotta, mustard, sage */
+    /* Design ref: navy, terracotta, mustard, sage, blush */
     --text-main: #1A365D;
     --traffic-red: #E07A5F;
     --traffic-yellow: #E9C46A;
     --traffic-green: #8FA6B3;
+
+    /* Design ref colors */
+    --bg-color: #FAFAF5;
+    --grid-color: rgba(26, 54, 93, 0.06);
+    --window-main: #E8B4B8;
+    --btn-bg: #E07A5F;
+    --btn-text: #FFFFFF;
+    --card-1: #8FA6B3;
+    --card-2: #E9C46A;
+    --card-3: #A3C4DC;
 
     --background: 60 33% 98%;
     --foreground: 217 56% 23%;
@@ -22,7 +32,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 217 56% 23%;
 
-    --primary: 12 67% 65%;
+    --primary: 12 68% 65%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 60 25% 95%;
@@ -46,17 +56,12 @@
     --title-bar-pink: 330 44% 80%;
     --sticker: 206 16% 63%;
 
-    --card-1: 206 16% 63%;
-    --card-2: 43 77% 66%;
-    --card-3: 208 44% 75%;
-
     --input-border: 217 20% 90%;
-    --grid-color: 217 56% 23% / 0.06;
 
     --radius: 12px;
     --radius-lg: 12px;
 
-    /* Hard offset shadow (no blur) — Variant style */
+    /* Hard offset shadow (no blur) — design ref */
     --shadow-window: 6px 6px 0 0 var(--text-main);
     --shadow-window-hover: 8px 8px 0 0 var(--text-main);
     --shadow-btn: 4px 4px 0 0 var(--text-main);
@@ -69,10 +74,11 @@
   }
 
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply text-foreground antialiased;
     font-family: 'Space Grotesk', system-ui, sans-serif;
     position: relative;
     color: var(--text-main);
+    background-color: var(--bg-color);
   }
 
   body::before {
@@ -80,8 +86,8 @@
     position: fixed;
     inset: 0;
     background-image:
-      linear-gradient(to right, hsl(var(--grid-color)) 1px, transparent 1px),
-      linear-gradient(to bottom, hsl(var(--grid-color)) 1px, transparent 1px);
+      linear-gradient(to right, var(--grid-color) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px);
     background-size: 40px 40px;
     pointer-events: none;
     z-index: 0;
@@ -95,17 +101,21 @@
   .font-display {
     font-family: 'Space Grotesk', system-ui, sans-serif;
   }
-  .shadow-card {
+  .shadow-card,
+  .window-shadow {
     box-shadow: var(--shadow-window);
   }
   .shadow-card-hover:hover {
     transform: translate(-2px, -2px);
     box-shadow: var(--shadow-window-hover);
   }
-  .shadow-btn {
+  .shadow-btn,
+  .btn-shadow {
     box-shadow: var(--shadow-btn);
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
   }
-  .shadow-btn:active {
+  .shadow-btn:active,
+  .btn-shadow:active {
     transform: translate(4px, 4px);
     box-shadow: none;
   }
@@ -118,5 +128,86 @@
   }
   .window-border {
     border: 3px solid var(--text-main);
+    border-radius: 12px;
+  }
+  /* Variant design: custom-checkbox */
+  .custom-checkbox {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    border: 2px solid var(--text-main);
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+    background: white;
+  }
+  .custom-checkbox:checked {
+    background-color: var(--traffic-yellow);
+  }
+  .custom-checkbox:checked::after {
+    content: "✓";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: bold;
+    font-size: 12px;
+    color: var(--text-main);
+    -webkit-text-fill-color: var(--text-main);
+  }
+  .custom-checkbox.rounded-full {
+    border-radius: 9999px;
+  }
+  /* Variant design: bg utilities */
+  .bg-window-main { background-color: var(--window-main); }
+  .bg-btn-main { background-color: var(--btn-bg); }
+  .text-btn-main { color: var(--btn-text); }
+  .bg-card-1 { background-color: var(--card-1); }
+  .bg-card-2 { background-color: var(--card-2); }
+  .bg-card-3 { background-color: var(--card-3); }
+  /* Striped progress bar (Variant design ref) */
+  .progress-bar-striped {
+    background: repeating-linear-gradient(
+      -45deg,
+      var(--traffic-green),
+      var(--traffic-green) 6px,
+      color-mix(in srgb, var(--traffic-green) 80%, transparent) 6px,
+      color-mix(in srgb, var(--traffic-green) 80%, transparent) 12px
+    );
+    animation: progress-stripes 0.5s linear infinite;
+  }
+  .progress-bar-container {
+    height: 24px;
+    background: #ffffff;
+    border: 3px solid var(--text-main);
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background-color: var(--traffic-green);
+    transition: width 0.5s ease;
+    background-image: linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.15) 25%,
+      transparent 25%,
+      transparent 50%,
+      rgba(255, 255, 255, 0.15) 50%,
+      rgba(255, 255, 255, 0.15) 75%,
+      transparent 75%,
+      transparent
+    );
+    background-size: 40px 40px;
+    animation: move-stripes 2s linear infinite;
+  }
+  @keyframes progress-stripes {
+    from { background-position: 0 0; }
+    to { background-position: 24px 0; }
+  }
+  @keyframes move-stripes {
+    from { background-position: 0 0; }
+    to { background-position: 40px 0; }
   }
 }

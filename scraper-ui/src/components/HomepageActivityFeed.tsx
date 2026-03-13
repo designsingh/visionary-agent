@@ -44,7 +44,7 @@ const HomepageActivityFeed = () => {
   }, []);
 
   return (
-    <div className="w-full">
+    <div className="w-full pt-8">
       <div className="flex items-center justify-between mb-6 border-b-[3px] border-[var(--text-main)] pb-4">
         <h2 className="text-xl font-bold flex items-center gap-3 text-[var(--text-main)]">
           <span className="w-9 h-9 rounded-lg bg-[var(--traffic-yellow)] border-2 border-[var(--text-main)] flex items-center justify-center">
@@ -63,7 +63,7 @@ const HomepageActivityFeed = () => {
           {lines.map((line, i) => (
             <div
               key={line.id}
-              className={`text-muted-foreground ${i === lines.length - 1 ? "animate-fade-in-up" : ""}`}
+              className={`text-[rgba(20,24,31,1)] ${i === lines.length - 1 ? "animate-fade-in-up" : ""}`}
             >
               {line.text}
             </div>

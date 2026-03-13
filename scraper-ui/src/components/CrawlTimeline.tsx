@@ -1,14 +1,14 @@
 import { useEffect, useRef } from "react";
-import { Loader2 } from "lucide-react";
 import WindowChrome from "./WindowChrome";
 
 interface CrawlTimelineProps {
   domain: string;
   foundUrls: { url: string; title?: string }[];
   extracting?: boolean;
+  extractingTotal?: number;
 }
 
-const CrawlTimeline = ({ domain, foundUrls, extracting }: CrawlTimelineProps) => {
+const CrawlTimeline = ({ domain, foundUrls, extracting, extractingTotal = 0 }: CrawlTimelineProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const displayUrls = foundUrls.slice(-20);
 
@@ -16,12 +16,46 @@ const CrawlTimeline = ({ domain, foundUrls, extracting }: CrawlTimelineProps) =>
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [foundUrls]);
 
+  const percentComplete = extracting
+    ? 100
+    : foundUrls.length > 0
+      ? Math.min(70 + foundUrls.length * 2, 95)
+      : 30;
+
+  const totalSize = "—"; // We don't have size from API; design shows "2.4 MB Total Size"
+
   return (
-    <WindowChrome title={`${extracting ? "Extracting" : "Crawling"} — ${domain}`}>
-      <div className="flex items-center gap-2 border-b-2 border-[var(--text-main)]/20 px-3 py-2 bg-white/40">
-        <Loader2 className="h-3.5 w-3.5 animate-spin text-[var(--text-main)] shrink-0" />
+    <div className="space-y-6">
+      {/* Variant design: status bar — white box with progress-bar-container */}
+      <div className="w-full window-border window-shadow bg-white p-6 flex flex-col md:flex-row items-center gap-6">
+        <div className="flex-1 w-full">
+          <div className="flex justify-between items-end mb-2">
+            <div className="flex flex-col">
+              <span className="font-bold text-xs uppercase tracking-widest opacity-60 text-[var(--text-main)]">Status</span>
+              <h2 className="text-xl font-bold flex items-center gap-2 text-[var(--text-main)]">
+                {extracting ? "Extracting" : "Crawling"}{" "}
+                <span className="font-mono text-[var(--btn-bg)]">{domain}</span>
+              </h2>
+            </div>
+            <span className="font-mono font-bold text-lg text-[var(--text-main)]">{extracting ? 100 : percentComplete}% Complete</span>
+          </div>
+          <div className="progress-bar-container">
+            <div className="progress-bar-fill" style={{ width: `${extracting ? 100 : percentComplete}%` }} />
+          </div>
+        </div>
+        <div className="flex gap-4">
+          <div className="text-center px-4">
+            <div className="text-2xl font-bold text-[var(--text-main)]">{foundUrls.length}</div>
+            <div className="text-[10px] font-bold uppercase opacity-60 text-[var(--text-main)]">Pages Found</div>
+          </div>
+          <div className="text-center px-4 border-l-2 border-[var(--text-main)]/10">
+            <div className="text-2xl font-bold text-[var(--text-main)]">{totalSize}</div>
+            <div className="text-[10px] font-bold uppercase opacity-60 text-[var(--text-main)]">Total Size</div>
+          </div>
+        </div>
       </div>
 
+      <WindowChrome title={`${extracting ? "Extracting" : "Crawling"} — ${domain}`}>
       <div
         ref={scrollRef}
         className="max-h-48 overflow-y-auto p-4 font-mono text-xs bg-white/50 min-h-[8rem]"
@@ -62,15 +96,8 @@ const CrawlTimeline = ({ domain, foundUrls, extracting }: CrawlTimelineProps) =>
         </div>
       </div>
 
-      <div className="h-1.5 w-full overflow-hidden bg-[var(--text-main)]/10">
-        <div
-          className="h-full bg-[var(--traffic-green)] transition-all duration-500 ease-out"
-          style={{
-            width: extracting ? "100%" : foundUrls.length > 0 ? `${Math.min(70 + foundUrls.length * 2, 95)}%` : "30%",
-          }}
-        />
-      </div>
-    </WindowChrome>
+      </WindowChrome>
+    </div>
   );
 };
 

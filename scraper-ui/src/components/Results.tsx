@@ -1,74 +1,27 @@
 import { useState, useEffect } from "react";
-import { Copy, Download, Check, Clock } from "lucide-react";
+import JSZip from "jszip";
+import { Download, CheckCircle, FileText, Image } from "lucide-react";
 import type { DiscoveredPage } from "./PageDiscovery";
+import WindowChrome from "./WindowChrome";
 
 interface ResultsProps {
+  domain?: string;
   pages: DiscoveredPage[];
   formats: string[];
   pageContent?: Record<string, { markdown?: string; html?: string; screenshot?: string }>;
 }
 
-const FALLBACK_MARKDOWN = `# Welcome to Example Corp
-
-We build tools that help developers ship faster.
-
-## Our Mission
-
-At Example Corp, we believe that great software starts with great tools. Our platform provides everything you need to go from idea to production in record time.
-
-## Features
-
-- **Fast Builds** — Deploy in seconds, not minutes
-- **Team Collaboration** — Built-in code review and pair programming
-- **Analytics** — Real-time insights into your application performance
-
-> "Example Corp cut our deployment time by 80%." — Jane Doe, CTO at StartupXYZ
-`;
-
-const FALLBACK_HTML = `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Example Corp</title>
-</head>
-<body>
-  <header>
-    <nav>
-      <a href="/">Home</a>
-      <a href="/about">About</a>
-      <a href="/pricing">Pricing</a>
-    </nav>
-  </header>
-  <main>
-    <h1>Welcome to Example Corp</h1>
-    <p>We build tools that help developers ship faster.</p>
-  </main>
-</body>
-</html>`;
-
-const Results = ({ pages, formats, pageContent = {} }: ResultsProps) => {
+const Results = ({ domain = "", pages, formats, pageContent = {} }: ResultsProps) => {
   const [countdown, setCountdown] = useState(600);
-  const [activeTabs, setActiveTabs] = useState<Record<string, string>>({});
-  const [copied, setCopied] = useState<string | null>(null);
-
-  useEffect(() => {
-    const initial: Record<string, string> = {};
-    pages.forEach((p) => { initial[p.path] = formats[0] || "screenshot"; });
-    setActiveTabs(initial);
-  }, [pages, formats]);
+  const [expanded, setExpanded] = useState(false);
+  const INITIAL_SHOW = 5;
 
   useEffect(() => {
     const timer = setInterval(() => setCountdown((c) => Math.max(0, c - 1)), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  const formatTime = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, "0")}`;
-
-  const copyToClipboard = (text: string, id: string) => {
-    navigator.clipboard.writeText(text);
-    setCopied(id);
-    setTimeout(() => setCopied(null), 2000);
-  };
+  const formatTime = (s: number) => `${Math.floor(s / 60)}m ${(s % 60).toString().padStart(2, "0")}s`;
 
   const downloadFile = (content: string, filename: string, type = "text/plain") => {
     const blob = new Blob([content], { type });
@@ -91,134 +44,195 @@ const Results = ({ pages, formats, pageContent = {} }: ResultsProps) => {
     URL.revokeObjectURL(a.href);
   };
 
-  const CopyBtn = ({ text, id }: { text: string; id: string }) => (
-    <button
-      onClick={() => copyToClipboard(text, id)}
-      className="flex items-center gap-1.5 window-border rounded-lg px-3 py-1.5 text-xs font-bold text-[var(--text-main)] hover:bg-white/60 transition-colors shadow-btn active:translate-y-0.5 active:shadow-none"
-    >
-      {copied === id ? <Check className="h-3.5 w-3.5 text-[var(--traffic-green)]" /> : <Copy className="h-3.5 w-3.5" />}
-      {copied === id ? "Copied" : "Copy"}
-    </button>
-  );
+  const downloadAllAsZip = async () => {
+    const zip = new JSZip();
+    const fileBase = (p: string) => (p.replace(/\//g, "_") || "index").replace(/^_/, "");
+    for (const page of pages) {
+      const base = fileBase(page.path);
+      const content = pageContent[page.path];
+      if (formats.includes("screenshot") && content?.screenshot) {
+        const bin = atob(content.screenshot);
+        const arr = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+        zip.file(`${base}.png`, arr);
+      }
+      if (formats.includes("markdown") && content?.markdown) {
+        zip.file(`${base}.md`, content.markdown);
+      }
+      if (formats.includes("html") && content?.html) {
+        zip.file(`${base}.html`, content.html);
+      }
+    }
+    const blob = await zip.generateAsync({ type: "blob" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `pagegrab-${Date.now()}.zip`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
 
-  const DownloadBtn = ({ onClick, label }: { onClick: () => void; label: string }) => (
-    <button
-      onClick={onClick}
-      className="flex items-center gap-1.5 window-border rounded-lg px-3 py-1.5 text-xs font-bold text-[var(--text-main)] hover:bg-white/60 transition-colors shadow-btn active:translate-y-0.5 active:shadow-none"
-    >
-      <Download className="h-3.5 w-3.5" />
-      {label}
-    </button>
-  );
+  const formatLabel = formats
+    .map((f) => (f === "screenshot" ? "PNG" : f === "markdown" ? "MD" : "HTML"))
+    .join(", ");
+
+  const displayedPages = expanded ? pages : pages.slice(0, INITIAL_SHOW);
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between window-border bg-white px-4 py-3 shadow-window rounded-[var(--radius)]">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Clock className="h-4 w-4" />
-          <span>Available <span className="font-mono font-medium text-foreground tabular-nums">{formatTime(countdown)}</span></span>
-        </div>
-        <button className="flex items-center gap-2 window-border bg-primary px-4 py-2 text-xs font-bold text-primary-foreground shadow-btn hover:-translate-y-0.5 active:translate-y-0 active:shadow-none transition-all">
-          <Download className="h-3.5 w-3.5" />
-          Download All as ZIP
-        </button>
-      </div>
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      {/* Left sidebar: success + Download All + Batch Details (design ref) */}
+      <aside className="lg:col-span-4 space-y-6">
+        <WindowChrome title="status.ok">
+          <div className="p-6 text-center">
+            <div className="w-20 h-20 bg-white window-border mx-auto mb-4 flex items-center justify-center shadow-btn rounded-lg">
+              <CheckCircle className="w-10 h-10 text-[var(--traffic-green)]" />
+            </div>
+            <h2 className="text-2xl font-bold mb-2 text-[var(--text-main)]">Grab Complete!</h2>
+            <p className="text-sm font-medium opacity-80 mb-6 text-[var(--text-main)]">
+              Found {pages.length} page{pages.length !== 1 ? "s" : ""} at{" "}
+              <span className="font-mono">{domain || "site"}/*</span>
+            </p>
 
-      {pages.map((page, i) => {
-        const cardBg = [ "bg-[hsl(var(--card-1))]", "bg-[hsl(var(--card-2))]", "bg-[hsl(var(--card-3))]" ][i % 3];
-        return (
-        <div key={page.path} className={`window-border overflow-hidden rounded-[var(--radius)] shadow-window ${cardBg}`}>
-          <div className="border-b-[3px] border-[var(--text-main)] px-4 py-3 flex items-center justify-between bg-white/40">
-            <div className="flex gap-1.5 shrink-0">
-              <span className="w-2.5 h-2.5 rounded-full border-[1.5px] border-[var(--text-main)] bg-[var(--traffic-red)]" />
-              <span className="w-2.5 h-2.5 rounded-full border-[1.5px] border-[var(--text-main)] bg-[var(--traffic-yellow)]" />
-              <span className="w-2.5 h-2.5 rounded-full border-[1.5px] border-[var(--text-main)] bg-[var(--traffic-green)]" />
+            <button
+              onClick={downloadAllAsZip}
+              className="w-full py-4 text-lg font-bold window-border bg-primary text-primary-foreground shadow-btn flex items-center justify-center gap-2 rounded-[var(--radius)] hover:-translate-y-0.5 active:translate-y-0 active:shadow-none transition-all"
+            >
+              <Download className="w-5 h-5" />
+              Download All (.ZIP)
+            </button>
+
+            <div className="grid grid-cols-2 gap-3 mt-4">
+              <button
+                type="button"
+                disabled
+                className="py-2 text-xs font-bold window-border bg-white/60 text-[var(--text-main)]/50 cursor-not-allowed flex items-center justify-center gap-1 rounded-lg"
+              >
+                PDF Pack
+              </button>
+              <button
+                type="button"
+                disabled
+                className="py-2 text-xs font-bold window-border bg-white/60 text-[var(--text-main)]/50 cursor-not-allowed flex items-center justify-center gap-1 rounded-lg"
+              >
+                JSON Data
+              </button>
             </div>
-            <div className="min-w-0 flex-1 mx-3">
-              <h4 className="text-sm font-bold text-[var(--text-main)] truncate">{page.title}</h4>
-              <p className="font-mono text-xs text-[var(--text-main)] opacity-80 truncate">{page.path}</p>
-            </div>
-            <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--text-main)] border-2 border-[var(--text-main)] px-2 py-0.5 rounded shrink-0">Captured</span>
           </div>
+        </WindowChrome>
 
-          {formats.length > 1 && (
-            <div className="flex gap-0 border-b border-border bg-muted/20 px-2">
-              {formats.map((f) => (
-                <button
-                  key={f}
-                  onClick={() => setActiveTabs((prev) => ({ ...prev, [page.path]: f }))}
-                  className={`relative px-4 py-2.5 text-xs font-medium transition-colors ${
-                    activeTabs[page.path] === f
-                      ? "text-primary"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {f === "screenshot" ? "Screenshot" : f === "markdown" ? "Markdown" : "HTML"}
-                  {activeTabs[page.path] === f && (
-                    <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-primary" />
-                  )}
-                </button>
-              ))}
+        <div className="border-dashed-select rounded-xl p-5">
+          <h3 className="font-bold text-sm mb-3 flex items-center gap-2 text-[var(--text-main)]">
+            Batch Details
+          </h3>
+          <div className="space-y-2 font-mono text-xs text-[var(--text-main)]">
+            <div className="flex justify-between">
+              <span>Size:</span>
+              <span className="font-bold">—</span>
             </div>
-          )}
+            <div className="flex justify-between">
+              <span>Pages:</span>
+              <span className="font-bold">{pages.length}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Format:</span>
+              <span className="font-bold">{formatLabel}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Expires in:</span>
+              <span className="font-bold text-[var(--traffic-red)]">{formatTime(countdown)}</span>
+            </div>
+          </div>
+        </div>
+      </aside>
 
-          <div className="p-5">
-            {activeTabs[page.path] === "screenshot" && (() => {
-              const screenshot = pageContent[page.path]?.screenshot;
-              const fileBase = (page.path.replace(/\//g, "_") || "index").replace(/^_/, "");
-              return (
-                <div className="space-y-3">
-                  {screenshot ? (
-                    <div className="border border-border overflow-hidden ring-capture">
-                      <img src={`data:image/png;base64,${screenshot}`} alt={page.title} className="max-h-80 w-full object-top object-contain" />
-                    </div>
+      {/* Right: Captured Files list (design ref) */}
+      <div className="lg:col-span-8">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold flex items-center gap-3 text-[var(--text-main)]">
+            <FileText className="w-8 h-8 text-[var(--traffic-yellow)]" />
+            Captured Files
+          </h2>
+          <span className="text-xs font-bold px-3 py-1 bg-white window-border rounded-lg">
+            {pages.length} Items
+          </span>
+        </div>
+
+        <div className="flex flex-col gap-4">
+          {displayedPages.map((page) => {
+            const content = pageContent[page.path];
+            const fileBase = (page.path.replace(/\//g, "_") || "index").replace(/^_/, "");
+            const hasScreenshot = formats.includes("screenshot") && content?.screenshot;
+            const hasMarkdown = formats.includes("markdown") && content?.markdown;
+            const hasHtml = formats.includes("html") && content?.html;
+
+            const handleDownload = () => {
+              if (hasScreenshot) downloadScreenshot(content!.screenshot!, `${fileBase}.png`);
+              else if (hasMarkdown) downloadFile(content!.markdown!, `${fileBase}.md`);
+              else if (hasHtml) downloadFile(content!.html!, `${fileBase}.html`);
+            };
+
+            return (
+              <div
+                key={page.path}
+                className="window-border bg-white p-4 flex items-center gap-4 rounded-[var(--radius)] hover:shadow-btn transition-all group"
+              >
+                <div className="w-16 h-12 window-border bg-muted/50 flex-shrink-0 rounded overflow-hidden flex items-center justify-center relative">
+                  {hasScreenshot ? (
+                    <img
+                      src={`data:image/png;base64,${content!.screenshot}`}
+                      alt=""
+                      className="w-full h-full object-cover"
+                    />
                   ) : (
-                    <div className="flex h-48 items-center justify-center bg-muted/50 border border-dashed border-border">
-                      <span className="text-sm text-muted-foreground">Screenshot unavailable</span>
-                    </div>
+                    <Image className="w-6 h-6 text-[var(--text-main)]/30" />
                   )}
-                  <DownloadBtn
-                    onClick={() => screenshot && downloadScreenshot(screenshot, `${fileBase}.png`)}
-                    label="Download PNG"
-                  />
                 </div>
-              );
-            })()}
-
-            {activeTabs[page.path] === "markdown" && (() => {
-              const md = pageContent[page.path]?.markdown ?? FALLBACK_MARKDOWN;
-              const fileBase = (page.path.replace(/\//g, "_") || "index").replace(/^_/, "");
-              return (
-                <div className="space-y-3">
-                  <pre className="max-h-56 overflow-auto font-mono bg-muted/50 border border-border p-4 text-xs leading-relaxed text-foreground">
-                    {md}
-                  </pre>
-                  <div className="flex gap-2">
-                    <CopyBtn text={md} id={`md-${page.path}`} />
-                    <DownloadBtn onClick={() => downloadFile(md, `${fileBase}.md`)} label="Download .md" />
+                <div className="flex-1 min-w-0">
+                  <div className="font-bold text-sm truncate font-mono text-[var(--text-main)]">
+                    {page.path}
+                  </div>
+                  <div className="flex gap-2 mt-1 flex-wrap">
+                    {hasHtml && (
+                      <span className="text-[10px] font-mono px-1.5 py-0.5 bg-[hsl(var(--card-3))] window-border rounded">
+                        HTML
+                      </span>
+                    )}
+                    {hasScreenshot && (
+                      <span className="text-[10px] font-mono px-1.5 py-0.5 bg-[hsl(var(--card-1))] window-border rounded">
+                        PNG
+                      </span>
+                    )}
+                    {hasMarkdown && (
+                      <span className="text-[10px] font-mono px-1.5 py-0.5 bg-[hsl(var(--card-2))] window-border rounded">
+                        MD
+                      </span>
+                    )}
                   </div>
                 </div>
-              );
-            })()}
-
-            {activeTabs[page.path] === "html" && (() => {
-              const html = pageContent[page.path]?.html ?? FALLBACK_HTML;
-              const fileBase = (page.path.replace(/\//g, "_") || "index").replace(/^_/, "");
-              return (
-                <div className="space-y-3">
-                  <pre className="max-h-56 overflow-auto font-mono bg-muted/50 border border-border p-4 text-xs leading-relaxed text-foreground">
-                    {html}
-                  </pre>
-                  <div className="flex gap-2">
-                    <CopyBtn text={html} id={`html-${page.path}`} />
-                    <DownloadBtn onClick={() => downloadFile(html, `${fileBase}.html`)} label="Download .html" />
-                  </div>
+                <div className="text-right flex flex-col items-end gap-2 shrink-0">
+                  <span className="font-mono text-[10px] font-bold opacity-60 text-[var(--text-main)]">
+                    {page.size}
+                  </span>
+                  <button
+                    onClick={handleDownload}
+                    className="w-8 h-8 bg-white window-border flex items-center justify-center shadow-btn hover:bg-gray-50 rounded-lg active:translate-y-0.5 active:shadow-none transition-all"
+                  >
+                    <Download className="w-4 h-4 text-[var(--text-main)]" />
+                  </button>
                 </div>
-              );
-            })()}
-          </div>
+              </div>
+            );
+          })}
         </div>
-      );})}
+
+        {pages.length > INITIAL_SHOW && !expanded && (
+          <button
+            onClick={() => setExpanded(true)}
+            className="mt-4 w-full py-3 font-bold text-sm window-border bg-white/80 rounded-lg hover:bg-white transition-colors text-[var(--text-main)]"
+          >
+            Show All {pages.length} Files
+          </button>
+        )}
+      </div>
     </div>
   );
 };

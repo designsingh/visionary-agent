@@ -1,5 +1,5 @@
 const Footer = () => (
-  <footer className="relative z-10 border-t-[3px] border-[var(--text-main)] bg-background px-6 py-8">
+  <footer className="relative z-10 bg-background px-6 pt-16 pb-10">
     <div className="mx-auto flex max-w-5xl flex-col items-center gap-4 sm:flex-row sm:justify-between">
       <span className="font-bold text-sm text-[var(--text-main)]">PageGrab</span>
       <div className="flex gap-8 font-medium text-sm">
