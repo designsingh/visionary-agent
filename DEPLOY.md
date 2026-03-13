@@ -33,10 +33,39 @@ One deployment. No VITE_API_URL needed. Frontend + API served from the same URL.
 
 Frontend on Netlify, backend on Railway. Needs `VITE_API_URL`.
 
+### Via Netlify UI
+
 1. **Railway** (backend): same as Option A. Copy your Railway URL from the service dashboard (e.g. `https://visionary-api-production.up.railway.app`).
 2. **Netlify** → Site settings → Environment variables:
    - Add `VITE_API_URL` = your Railway URL (no trailing slash)
-3. Trigger a **new deploy** in Netlify (so the build uses the new env var).
+3. **Netlify** → Site settings → Build & deploy → Link repository (if not already connected)
+4. Trigger a **new deploy** in Netlify (so the build uses the new env var).
+
+### Via Netlify CLI
+
+From the project root (where `netlify.toml` lives):
+
+```bash
+# 1. Install and log in (opens browser)
+npm i -g netlify-cli
+netlify login
+
+# 2. Create site + connect GitHub repo (opens browser for GitHub auth if needed)
+netlify init
+
+# 3. Set build env var (VITE_API_URL is also in .env.production; this overrides for UI)
+netlify env:set VITE_API_URL "https://visionary-api-production.up.railway.app"
+
+# 4. Deploy
+netlify deploy --prod
+```
+
+**Notes:**
+
+- `netlify init` creates a new site (or links to existing), configures build from `netlify.toml`, and **connects the GitHub repo** for continuous deployment. It will prompt for GitHub access.
+- `netlify link` only links a folder to an existing site – it does **not** connect the repo. Use `netlify init` for full CI/CD setup.
+- `netlify env:set` pushes vars to Netlify’s UI; `scraper-ui/.env.production` also embeds `VITE_API_URL` at build time.
+- `netlify deploy --prod` does a one-off deploy. After `init`, pushes to the connected repo will auto-deploy.
 
 ---
 
