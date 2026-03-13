@@ -1,9 +1,9 @@
 [build]
   command = "npm run build:scraper"
   publish = "public"
-
 [build.environment]
   VITE_API_URL = "https://visionary-api-production.up.railway.app"
+  NODE_VERSION = "22"
 
 # SPA: all routes serve index.html
 [[redirects]]
