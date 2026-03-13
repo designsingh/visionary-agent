@@ -86,3 +86,19 @@ Add these in the Railway service **Variables** tab:
 
 - **Railway** keeps services warm longer; no forced spin-down after 15 min.
 - Railway uses `PORT` automatically – your server already reads `process.env.PORT`.
+
+---
+
+## Troubleshooting
+
+### "Authentication error" (401) from Cloudflare
+
+Railway returns `500` with `"Authentication error"` from Cloudflare. Fix:
+
+1. **Token permissions** – In [Cloudflare API Tokens](https://dash.cloudflare.com/profile/api-tokens), create a token with **Browser Rendering - Edit**.
+2. **Account ID** – Copy from Cloudflare dashboard (right sidebar).
+3. **Railway** – Update `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN`, then redeploy.
+
+### "Unexpected token '<'" (JSON parse error)
+
+Frontend expected JSON but got HTML. Usually means `VITE_API_URL` was empty at build time, so requests hit Netlify (HTML) instead of Railway. Fix: ensure `scraper-ui/.env.production` exists with `VITE_API_URL` and redeploy Netlify.
