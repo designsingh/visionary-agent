@@ -28,7 +28,7 @@ const Index = () => {
   const [error, setError] = useState("");
   const [foundUrls, setFoundUrls] = useState<{ url: string; title?: string }[]>([]);
 
-  const handleSubmit = (url: string) => {
+  const handleSubmit = (url: string, turnstileToken?: string) => {
     let origin = "";
     try {
       const parsed = new URL(url.startsWith("http") ? url : `https://${url}`);
@@ -44,7 +44,8 @@ const Index = () => {
     setFoundUrls([]);
     setStep("crawling");
 
-    const streamUrl = `${API_BASE}/api/scraper/crawl-stream?url=${encodeURIComponent(url)}&limit=30`;
+    const tokenParam = turnstileToken ? `&token=${encodeURIComponent(turnstileToken)}` : "";
+    const streamUrl = `${API_BASE}/api/scraper/crawl-stream?url=${encodeURIComponent(url)}&limit=30${tokenParam}`;
     const evt = new EventSource(streamUrl);
 
     evt.addEventListener("url", (e) => {
@@ -88,18 +89,18 @@ const Index = () => {
     evt.onerror = () => {
       evt.close();
       setStep((s) => {
-        if (s === "crawling") fallbackToPostCrawl(url);
+        if (s === "crawling") fallbackToPostCrawl(url, turnstileToken);
         return s;
       });
     };
   };
 
-  const fallbackToPostCrawl = async (url: string) => {
+  const fallbackToPostCrawl = async (url: string, turnstileToken?: string) => {
     try {
       const res = await fetch(`${API_BASE}/api/scraper/crawl`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url, limit: 30 }),
+        body: JSON.stringify({ url, limit: 30, turnstileToken }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Crawl failed");

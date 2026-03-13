@@ -1,9 +1,12 @@
 import { useState, useEffect, useRef } from "react";
-import { Globe, Camera, ChevronLeft, ChevronRight } from "lucide-react";
+import { Globe, Camera } from "lucide-react";
+import { Turnstile } from "react-turnstile";
 import WindowChrome from "./WindowChrome";
 
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY ?? "";
+
 interface UrlInputProps {
-  onSubmit: (url: string) => void;
+  onSubmit: (url: string, turnstileToken?: string) => void;
   isLoading: boolean;
 }
 
@@ -16,7 +19,10 @@ const EXAMPLE_URLS = [
 const UrlInput = ({ onSubmit, isLoading }: UrlInputProps) => {
   const [url, setUrl] = useState("");
   const [error, setError] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const requireTurnstile = !!TURNSTILE_SITE_KEY;
+
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
@@ -27,10 +33,14 @@ const UrlInput = ({ onSubmit, isLoading }: UrlInputProps) => {
       setError("Please enter a URL to get started.");
       return;
     }
+    if (requireTurnstile && !turnstileToken) {
+      setError("Please complete the security check below.");
+      return;
+    }
     try {
       const parsed = new URL(trimmed.startsWith("http") ? trimmed : `https://${trimmed}`);
       setError("");
-      onSubmit(parsed.href);
+      onSubmit(parsed.href, turnstileToken ?? undefined);
     } catch {
       setError("That doesn't look like a valid URL. Try something like https://example.com");
     }
@@ -59,7 +69,7 @@ const UrlInput = ({ onSubmit, isLoading }: UrlInputProps) => {
             <button
               type="button"
               onClick={handleSubmit}
-              disabled={isLoading}
+              disabled={isLoading || (requireTurnstile && !turnstileToken)}
               className="px-8 py-4 text-lg font-bold window-border bg-primary text-primary-foreground shadow-btn hover:-translate-y-1 active:translate-y-0 active:shadow-none transition-all whitespace-nowrap flex items-center justify-center gap-2 rounded-[var(--radius)] disabled:opacity-50"
             >
               {isLoading ? (
@@ -72,6 +82,18 @@ const UrlInput = ({ onSubmit, isLoading }: UrlInputProps) => {
               )}
             </button>
           </div>
+          {requireTurnstile && (
+            <div className="flex justify-center mt-6">
+              <Turnstile
+                sitekey={TURNSTILE_SITE_KEY}
+                onVerify={(token) => setTurnstileToken(token)}
+                onExpire={() => setTurnstileToken(null)}
+                appearance="interaction-only"
+                size="compact"
+                refreshExpired="auto"
+              />
+            </div>
+          )}
           <div className="flex flex-wrap items-center justify-center gap-3 mt-8 text-sm font-bold">
             <span className="opacity-70 flex items-center gap-1">
               <span className="font-mono">Quick Try:</span>

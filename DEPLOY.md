@@ -77,8 +77,18 @@ Add these in the Railway service **Variables** tab:
 |----------|----------|-------|
 | `CLOUDFLARE_ACCOUNT_ID` | Yes | For crawl + screenshot |
 | `CLOUDFLARE_API_TOKEN` | Yes | For crawl + screenshot |
+| `TURNSTILE_SECRET_KEY` | No | For abuse prevention (Cloudflare Turnstile). If not set, verification is skipped. |
 | `GEMINI_API_KEY` | No | For Visionary pipeline |
 | `V0_API_KEY` | No | For v0 redesign |
+
+## Abuse prevention (Cloudflare Turnstile)
+
+To prevent scripted abuse, add [Cloudflare Turnstile](https://dash.cloudflare.com/?to=/:account/turnstile) (free):
+
+1. **Cloudflare** → Turnstile → Add site → Copy **Site Key** and **Secret Key**
+2. **Netlify** → Environment variables → `VITE_TURNSTILE_SITE_KEY` = your Site Key (public, for frontend build)
+3. **Railway** → Variables → `TURNSTILE_SECRET_KEY` = your Secret Key (private)
+4. Redeploy both. The Grab button requires a completed Turnstile check before crawl; rate limit is 4 requests/hour per IP.
 
 ---
 

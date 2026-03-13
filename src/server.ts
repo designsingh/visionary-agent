@@ -6,6 +6,7 @@
 import "dotenv/config";
 import cors from "cors";
 import express from "express";
+import { rateLimit } from "express-rate-limit";
 import { readdir } from "fs/promises";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
@@ -21,8 +22,19 @@ const publicDir = join(root, "public");
 const outputDir = join(root, OUTPUT_DIR);
 
 const app = express();
+app.set("trust proxy", 1); // Railway and other proxies; use X-Forwarded-For for rate limit
 app.use(cors());
 app.use(express.json());
+
+// Abuse prevention: limit scraper API usage per IP (free tier)
+const scraperLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 4, // ~1–2 full crawls per hour (crawl + screenshots)
+  message: { error: "Usage limit reached. Please try again in an hour. This is a free tool — thanks for understanding." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use("/api/scraper", scraperLimiter);
 
 // Static: output images
 app.use("/output", express.static(outputDir));
@@ -107,6 +119,24 @@ app.get("/api/generate-pitch", async (req, res) => {
 
 // --- Scraper platform API ---
 
+/** Verify Cloudflare Turnstile token. Returns true if valid or if Turnstile is not configured. */
+async function verifyTurnstile(token: string | undefined, remoteIp?: string): Promise<{ ok: boolean; error?: string }> {
+  const secret = process.env.TURNSTILE_SECRET_KEY;
+  if (!secret) return { ok: true }; // Skip when not configured (e.g. local dev)
+  if (!token || typeof token !== "string") return { ok: false, error: "Verification required. Please complete the security check and try again." };
+  try {
+    const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ secret, response: token, remoteip: remoteIp || undefined }),
+    });
+    const data = (await res.json()) as { success?: boolean };
+    return data.success ? { ok: true } : { ok: false, error: "Verification failed. Please try again." };
+  } catch {
+    return { ok: false, error: "Verification failed. Please try again." };
+  }
+}
+
 function sameSite(url: string, baseUrl: string): boolean {
   try {
     const a = new URL(url).hostname.replace(/^www\./, "");
@@ -137,11 +167,15 @@ function recordToDiscovered(rec: CrawlRecord, baseUrl: string): { path: string; 
   }
 }
 
-// GET /api/scraper/crawl-stream?url=xxx - SSE stream, sends urls as they're found, then final result
+// GET /api/scraper/crawl-stream?url=xxx&token=xxx - SSE stream, sends urls as they're found, then final result
 app.get("/api/scraper/crawl-stream", async (req, res) => {
   const url = req.query.url as string;
   if (!url || !url.startsWith("http")) {
     return res.status(400).json({ error: "Missing or invalid url query param" });
+  }
+  const turnstile = await verifyTurnstile(req.query.token as string | undefined, req.ip);
+  if (!turnstile.ok) {
+    return res.status(403).json({ error: turnstile.error });
   }
   const limit = Math.min(50, parseInt((req.query.limit as string) || "30", 10));
   res.writeHead(200, {
@@ -207,6 +241,10 @@ app.post("/api/scraper/crawl", async (req, res) => {
   const url = req.body?.url;
   if (!url || typeof url !== "string" || !url.startsWith("http")) {
     return res.status(400).json({ error: "Missing or invalid url" });
+  }
+  const turnstile = await verifyTurnstile(req.body?.turnstileToken, req.ip);
+  if (!turnstile.ok) {
+    return res.status(403).json({ error: turnstile.error });
   }
   const limit = Math.min(50, parseInt(req.body?.limit, 10) || 30);
   try {
