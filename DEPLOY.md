@@ -1,39 +1,59 @@
-# Deploying PageGrab / Visionary
+# Deploying PageGrab
 
-The scraper needs a **long-running backend** (crawls take 1–2 min). Netlify serverless functions time out at ~26s, so we use:
+## What is VITE_API_URL?
 
-- **Netlify** – frontend (static)
-- **Render** – backend (Node/Express)
+**VITE_API_URL** = the URL of your backend server.
 
-## 1. Deploy backend to Render
+- **Netlify** only hosts static files (HTML, JS, CSS). It has no Node server.
+- Your **crawl** and **screenshot** APIs need a real server (they take 1–2 minutes).
+- So the backend runs on **Railway** (e.g. `https://visionary-api-production.up.railway.app`).
+- The frontend needs to know: "when I call the API, hit that URL."
+- `VITE_API_URL` is set at build time – e.g. `https://visionary-api-production.up.railway.app`
+- Then `fetch(\`${VITE_API_URL}/api/scraper/crawl\`)` becomes `fetch('https://visionary-api-production.up.railway.app/api/scraper/crawl')`
 
-1. Push this repo to GitHub.
-2. Go to [render.com](https://render.com) → New → Web Service.
-3. Connect your repo, choose the `visionary-agent` directory if it’s in a monorepo.
-4. Render will detect `render.yaml`. Otherwise set:
-   - **Build command:** `npm install && npm run build:scraper`
-   - **Start command:** `npx tsx src/server.ts`
-5. Add environment variables (Dashboard → Environment):
-   - `CLOUDFLARE_ACCOUNT_ID`
-   - `CLOUDFLARE_API_TOKEN`
-   - `GEMINI_API_KEY` (optional, for Visionary)
-   - `V0_API_KEY` (optional, for Visionary)
-6. Deploy. Copy your backend URL (e.g. `https://visionary-api-xxx.onrender.com`).
+**When running locally:** No `VITE_API_URL` – frontend and backend are same origin (localhost:3333), so `/api/...` works.
 
-## 2. Deploy frontend to Netlify
+---
 
-1. Go to [netlify.com](https://netlify.com) → Add new site → Import from Git.
-2. Connect the same repo.
-3. Settings:
-   - **Base directory:** `visionary-agent` (if repo root is higher)
-   - **Build command:** `npm run build:scraper`
-   - **Publish directory:** `visionary-agent/public` or `public`
-4. **Environment variables** → add:
-   - `VITE_API_URL` = your Render backend URL (e.g. `https://visionary-api-xxx.onrender.com`)
-5. Deploy.
+## Option A: Deploy everything to Railway (simplest)
 
-The frontend will call the backend at `VITE_API_URL`. If `VITE_API_URL` is unset, it uses relative `/api` (same-origin), which only works when frontend and backend are served together (e.g. localhost).
+One deployment. No VITE_API_URL needed. Frontend + API served from the same URL.
 
-## 3. CORS
+1. Go to [railway.app](https://railway.app) → **New Project** → **Deploy from GitHub**
+2. Connect **designsingh/visionary-agent** and select the repo
+3. Railway will use `railway.json`. If not, set:
+   - **Build:** `npm install && npm run build:scraper`
+   - **Start:** `npx tsx src/server.ts`
+4. Add env vars in **Variables**: `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`
+5. Deploy. Railway assigns a URL like `https://visionary-agent-production.up.railway.app` (or your custom domain).
 
-The Render backend must allow the Netlify frontend origin. Add CORS in `src/server.ts` if you see cross-origin errors.
+---
+
+## Option B: Netlify (frontend) + Railway (backend)
+
+Frontend on Netlify, backend on Railway. Needs `VITE_API_URL`.
+
+1. **Railway** (backend): same as Option A. Copy your Railway URL from the service dashboard (e.g. `https://visionary-api-production.up.railway.app`).
+2. **Netlify** → Site settings → Environment variables:
+   - Add `VITE_API_URL` = your Railway URL (no trailing slash)
+3. Trigger a **new deploy** in Netlify (so the build uses the new env var).
+
+---
+
+## Railway env vars
+
+Add these in the Railway service **Variables** tab:
+
+| Variable | Required | Notes |
+|----------|----------|-------|
+| `CLOUDFLARE_ACCOUNT_ID` | Yes | For crawl + screenshot |
+| `CLOUDFLARE_API_TOKEN` | Yes | For crawl + screenshot |
+| `GEMINI_API_KEY` | No | For Visionary pipeline |
+| `V0_API_KEY` | No | For v0 redesign |
+
+---
+
+## Railway vs Render
+
+- **Railway** keeps services warm longer; no forced spin-down after 15 min.
+- Railway uses `PORT` automatically – your server already reads `process.env.PORT`.
