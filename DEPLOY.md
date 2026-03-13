@@ -102,3 +102,10 @@ Railway returns `500` with `"Authentication error"` from Cloudflare. Fix:
 ### "Unexpected token '<'" (JSON parse error)
 
 Frontend expected JSON but got HTML. Usually means `VITE_API_URL` was empty at build time, so requests hit Netlify (HTML) instead of Railway. Fix: ensure `scraper-ui/.env.production` exists with `VITE_API_URL` and redeploy Netlify.
+
+### Netlify production deploy locked
+
+If `netlify deploy --prod` says "Deployments are locked", new builds won’t publish to the live site.
+
+1. **Netlify** → Site settings → **Build & deploy** → **Deploy locks** → disable "Lock production deploys".
+2. Then: **Deploys** → **Trigger deploy** → **Deploy site**, or run `netlify deploy --prod` from the project.

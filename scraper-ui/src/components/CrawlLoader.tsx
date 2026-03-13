@@ -2,44 +2,27 @@ import { useState, useEffect } from "react";
 import { Loader2, ExternalLink } from "lucide-react";
 
 const CRAWL_MESSAGES = [
-  "Dispatching tiny minions to dig through the site…",
-  "Minions are burrowing into the homepage…",
-  "They've found the links — sending more minions after them…",
-  "Minion #7 just grabbed the About page…",
-  "Digging, digging… they really love to dig…",
-  "One minion is taking screenshots. The others are jealous…",
-  "They're bringing back pages in their little baskets…",
-  "Minion spotted in /pricing. Reinforcements inbound…",
-  "Converting their loot into markdown and HTML…",
-  "Almost done — minions are dusting themselves off…",
-  "They keep finding more pages. Overachievers…",
-  "A minion fell in the footer. We're sending a rescue…",
-  "The minions made a human pyramid to reach the nav…",
-  "Boss, they're coming back with the goods…",
-  "Last minion is climbing out of the contact form…",
+  "Discovering pages…",
+  "Following links…",
+  "Indexing {domain}…",
+  "More pages found…",
+  "Almost done…",
 ];
 
 const EXTRACT_MESSAGES = [
-  "Wrapping each page in a tidy little bundle…",
-  "Taking full-page screenshots (the minions love the camera)…",
-  "Converting everything to clean markdown…",
-  "Exporting HTML with all the bells and whistles…",
-  "One more page… almost there…",
-  "Double-checking the files before handoff…",
-  "The minions are doing quality control…",
-  "Packaging your files for download…",
-  "Making sure nothing gets left behind…",
-  "Final polish on the export…",
-  "Gathering screenshots from the field…",
-  "Formatting markdown, one page at a time…",
-  "Almost ready — just tidying up…",
+  "Capturing screenshots…",
+  "Converting to markdown…",
+  "Exporting HTML…",
+  "Preparing files…",
+  "Almost ready…",
 ];
 
 interface FoundUrl { url: string; title?: string }
 
 const CrawlLoader = ({ domain, foundUrls = [], extracting = false }: { domain: string; foundUrls?: FoundUrl[]; extracting?: boolean }) => {
   const [messageIndex, setMessageIndex] = useState(0);
-  const messages = extracting ? EXTRACT_MESSAGES : CRAWL_MESSAGES;
+  const rawMessages = extracting ? EXTRACT_MESSAGES : CRAWL_MESSAGES;
+  const messages = rawMessages.map((m) => m.replace("{domain}", domain));
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -49,20 +32,20 @@ const CrawlLoader = ({ domain, foundUrls = [], extracting = false }: { domain: s
   }, [messages.length]);
 
   return (
-    <div className="rounded-xl border border-border bg-card p-6 shadow-card">
+    <div className="border border-border bg-card p-5 shadow-card">
       <div className="flex items-center gap-3">
-        <Loader2 className="h-5 w-5 animate-spin text-primary shrink-0" />
+        <Loader2 className="h-4 w-4 animate-spin text-primary shrink-0" />
         <div className="min-w-0 flex-1">
           <p className="text-sm font-medium">
-            {extracting ? "Extracting" : "Crawling"} <span className="text-primary">{domain}</span>
+            {extracting ? "Extracting" : "Crawling"} <span className="text-primary font-mono">{domain}</span>
           </p>
-          <p className="text-sm text-muted-foreground mt-1">{messages[messageIndex]}</p>
+          <p className="font-mono text-xs text-muted-foreground mt-1">{messages[messageIndex]}</p>
         </div>
       </div>
       {!extracting && foundUrls.length > 0 && (
-        <div className="mt-4 max-h-32 overflow-y-auto rounded-lg border border-border bg-muted/30 px-3 py-2">
-          <p className="text-xs font-medium text-muted-foreground mb-1.5">{foundUrls.length} page{foundUrls.length !== 1 ? "s" : ""} found so far</p>
-          <ul className="space-y-1 text-xs">
+        <div className="mt-4 max-h-32 overflow-y-auto border border-border bg-muted/30 px-3 py-2">
+          <p className="font-mono text-xs text-muted-foreground mb-1.5">{foundUrls.length} pages found</p>
+          <ul className="space-y-1 font-mono text-xs">
             {foundUrls.slice(-8).reverse().map((u, i) => {
               let display = u.title;
               if (!display) {
@@ -82,8 +65,8 @@ const CrawlLoader = ({ domain, foundUrls = [], extracting = false }: { domain: s
           </ul>
         </div>
       )}
-      <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-muted">
-        <div className="h-full rounded-full bg-primary/60 animate-shimmer" style={{ width: !extracting && foundUrls.length > 0 ? "85%" : "70%" }} />
+      <div className="mt-4 h-1 w-full overflow-hidden bg-muted">
+        <div className="h-full bg-primary/70 animate-shimmer" style={{ width: !extracting && foundUrls.length > 0 ? "85%" : "70%" }} />
       </div>
     </div>
   );

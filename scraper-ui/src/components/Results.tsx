@@ -94,9 +94,9 @@ const Results = ({ pages, formats, pageContent = {} }: ResultsProps) => {
   const CopyBtn = ({ text, id }: { text: string; id: string }) => (
     <button
       onClick={() => copyToClipboard(text, id)}
-      className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted transition-colors"
+      className="flex items-center gap-1.5 border-2 border-border rounded-lg px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted transition-colors"
     >
-      {copied === id ? <Check className="h-3.5 w-3.5 text-primary" /> : <Copy className="h-3.5 w-3.5" />}
+      {copied === id ? <Check className="h-3.5 w-3.5 text-sticker" /> : <Copy className="h-3.5 w-3.5" />}
       {copied === id ? "Copied" : "Copy"}
     </button>
   );
@@ -104,7 +104,7 @@ const Results = ({ pages, formats, pageContent = {} }: ResultsProps) => {
   const DownloadBtn = ({ onClick, label }: { onClick: () => void; label: string }) => (
     <button
       onClick={onClick}
-      className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted transition-colors"
+      className="flex items-center gap-1.5 border-2 border-border rounded-lg px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted transition-colors"
     >
       <Download className="h-3.5 w-3.5" />
       {label}
@@ -113,26 +113,30 @@ const Results = ({ pages, formats, pageContent = {} }: ResultsProps) => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between rounded-xl border border-border bg-card px-5 py-3 shadow-card">
+      <div className="flex items-center justify-between border-2 border-border bg-card px-4 py-3 shadow-card rounded-lg">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Clock className="h-4 w-4" />
-          <span>Files available for <span className="font-semibold text-foreground tabular-nums">{formatTime(countdown)}</span></span>
+          <span>Available <span className="font-mono font-medium text-foreground tabular-nums">{formatTime(countdown)}</span></span>
         </div>
-        <button className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-xs font-medium text-primary-foreground hover:opacity-90 transition-all">
+        <button className="flex items-center gap-2 border border-primary bg-primary px-3 py-2 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors">
           <Download className="h-3.5 w-3.5" />
           Download All as ZIP
         </button>
       </div>
 
-      {pages.map((page) => (
-        <div key={page.path} className="rounded-xl border border-border bg-card shadow-card overflow-hidden">
-          <div className="border-b border-border px-5 py-3">
-            <h4 className="text-sm font-semibold">{page.title}</h4>
-            <p className="text-xs text-muted-foreground">{page.path}</p>
+      {pages.map((page, i) => (
+        <div key={page.path} className="border-2 border-border bg-card shadow-card overflow-hidden rounded-lg">
+          {/* Content card: alternating pink/orange title bars */}
+          <div className={`flex items-center justify-between border-b-2 border-border px-4 py-2.5 ${i % 2 === 0 ? "bg-[hsl(var(--title-bar))]" : "bg-title-bar-pink"}`}>
+            <div>
+              <h4 className="text-sm font-semibold text-white">{page.title}</h4>
+              <p className="font-mono text-xs text-white/80">{page.path}</p>
+            </div>
+            <span className="font-mono text-[10px] uppercase tracking-wider text-white/90 border border-white/40 px-2 py-0.5 rounded">Captured</span>
           </div>
 
           {formats.length > 1 && (
-            <div className="flex gap-0 border-b border-border bg-muted/30 px-2">
+            <div className="flex gap-0 border-b border-border bg-muted/20 px-2">
               {formats.map((f) => (
                 <button
                   key={f}
@@ -145,7 +149,7 @@ const Results = ({ pages, formats, pageContent = {} }: ResultsProps) => {
                 >
                   {f === "screenshot" ? "Screenshot" : f === "markdown" ? "Markdown" : "HTML"}
                   {activeTabs[page.path] === f && (
-                    <span className="absolute bottom-0 left-2 right-2 h-0.5 rounded-full bg-primary" />
+                    <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-primary" />
                   )}
                 </button>
               ))}
@@ -159,11 +163,11 @@ const Results = ({ pages, formats, pageContent = {} }: ResultsProps) => {
               return (
                 <div className="space-y-3">
                   {screenshot ? (
-                    <div className="rounded-lg border border-border overflow-hidden">
+                    <div className="border border-border overflow-hidden ring-capture">
                       <img src={`data:image/png;base64,${screenshot}`} alt={page.title} className="max-h-80 w-full object-top object-contain" />
                     </div>
                   ) : (
-                    <div className="flex h-48 items-center justify-center rounded-lg bg-muted/50 border border-border">
+                    <div className="flex h-48 items-center justify-center bg-muted/50 border border-dashed border-border">
                       <span className="text-sm text-muted-foreground">Screenshot unavailable</span>
                     </div>
                   )}
@@ -180,7 +184,7 @@ const Results = ({ pages, formats, pageContent = {} }: ResultsProps) => {
               const fileBase = (page.path.replace(/\//g, "_") || "index").replace(/^_/, "");
               return (
                 <div className="space-y-3">
-                  <pre className="max-h-56 overflow-auto rounded-lg bg-muted/50 border border-border p-4 text-xs leading-relaxed text-foreground">
+                  <pre className="max-h-56 overflow-auto font-mono bg-muted/50 border border-border p-4 text-xs leading-relaxed text-foreground">
                     {md}
                   </pre>
                   <div className="flex gap-2">
@@ -196,7 +200,7 @@ const Results = ({ pages, formats, pageContent = {} }: ResultsProps) => {
               const fileBase = (page.path.replace(/\//g, "_") || "index").replace(/^_/, "");
               return (
                 <div className="space-y-3">
-                  <pre className="max-h-56 overflow-auto rounded-lg bg-muted/50 border border-border p-4 text-xs leading-relaxed text-foreground">
+                  <pre className="max-h-56 overflow-auto font-mono bg-muted/50 border border-border p-4 text-xs leading-relaxed text-foreground">
                     {html}
                   </pre>
                   <div className="flex gap-2">

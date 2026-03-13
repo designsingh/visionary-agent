@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+/* PageGrab — "Internet utility from an alternate 1998" (polished) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,39 +7,54 @@
 
 @layer base {
   :root {
-    --background: 0 0% 99%;
-    --foreground: 224 20% 14%;
+    /* Reference: vibrant blue bg, cream panels, orange/yellow accents */
+    --background: 205 55% 92%;
+    --foreground: 24 10% 12%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 224 20% 14%;
+    --card: 36 40% 97%;
+    --card-foreground: 24 10% 12%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 224 20% 14%;
+    --popover: 36 40% 97%;
+    --popover-foreground: 24 10% 12%;
 
-    --primary: 238 60% 55%;
+    --primary: 28 90% 55%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 20% 96%;
-    --secondary-foreground: 224 20% 14%;
+    --secondary: 36 35% 93%;
+    --secondary-foreground: 24 10% 12%;
 
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 10% 46%;
+    --muted: 36 30% 92%;
+    --muted-foreground: 24 8% 42%;
 
-    --accent: 238 60% 55%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 45 95% 55%;
+    --accent-foreground: 24 10% 12%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 238 60% 55%;
+    --border: 24 15% 22%;
+    --border-muted: 36 15% 78%;
+    --input: 36 25% 90%;
+    --ring: 28 90% 55%;
 
-    --radius: 0.625rem;
+    /* Window title bar — warm orange (browser chrome) */
+    --title-bar: 35 95% 58%;
+    /* Alternate: pink for content cards */
+    --title-bar-pink: 330 75% 65%;
+    /* Sticker/playful — acid green (Hello!, toggles, live indicator) */
+    --sticker: 142 71% 45%;
 
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
-    --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+    /* Input vs window: inputs use thin border, white bg */
+    --input-border: 24 10% 85%;
+
+    /* Chunky 90s borders */
+    --radius: 6px;
+    --radius-lg: 8px;
+
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --shadow-card: 0 2px 6px rgba(0, 0, 0, 0.12);
+    --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.15);
+    --shadow-primary: 0 2px 10px hsl(var(--primary) / 0.35);
   }
 }
 
@@ -50,14 +66,46 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    position: relative;
+  }
+
+  /* 90s computer UI — visible graph-paper grid on blue */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(to right, hsl(205 40% 85% / 0.6) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(205 40% 85% / 0.6) 1px, transparent 1px);
+    background-size: 20px 20px;
+    pointer-events: none;
+    z-index: 0;
   }
 }
 
 @layer utilities {
+  /* Mono for metadata, numerals — pixel restraint */
+  .font-mono {
+    font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  }
+  /* Legacy display name — now using sans for headings per brand */
+  .font-display {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
   .shadow-card {
     box-shadow: var(--shadow-card);
   }
   .shadow-card-hover {
     box-shadow: var(--shadow-md);
+  }
+  .shadow-primary {
+    box-shadow: var(--shadow-primary);
+  }
+  /* Selection / capture language */
+  .border-dashed-select {
+    border: 1px dashed hsl(var(--primary));
+  }
+  .ring-capture {
+    box-shadow: 0 0 0 2px hsl(var(--primary) / 0.3);
   }
 }

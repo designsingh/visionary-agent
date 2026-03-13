@@ -15,9 +15,13 @@ export default {
     extend: {
       fontFamily: {
         sans: ["'Inter'", "system-ui", "-apple-system", "sans-serif"],
+        display: ["'Inter'", "system-ui", "sans-serif"],
+        mono: ["'JetBrains Mono'", "'SF Mono'", "Consolas", "monospace"],
       },
       colors: {
         border: "hsl(var(--border))",
+        "border-muted": "hsl(var(--border-muted))",
+        "border-input": "hsl(var(--input-border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
@@ -50,6 +54,8 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        sticker: "hsl(var(--sticker))",
+        "title-bar-pink": "hsl(var(--title-bar-pink))",
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -69,11 +75,21 @@ export default {
           "0%": { transform: "translateX(-100%)" },
           "100%": { transform: "translateX(100%)" },
         },
+        "fade-in-up": {
+          from: { opacity: "0", transform: "translateY(4px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+        "ticker": {
+          from: { transform: "translateX(0)" },
+          to: { transform: "translateX(-50%)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "shimmer": "shimmer 1.5s ease-in-out infinite",
+        "fade-in-up": "fade-in-up 0.3s ease-out forwards",
+        "ticker": "ticker 20s linear infinite",
       },
     },
   },

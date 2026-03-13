@@ -5,3 +5,6 @@ dist/
 .DS_Store
 output/*.png
 !output/.gitkeep
+
+# Local Netlify folder
+.netlify

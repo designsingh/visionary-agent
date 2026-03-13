@@ -1,7 +1,8 @@
 import { useState } from "react";
 import Header from "@/components/Header";
 import UrlInput from "@/components/UrlInput";
-import CrawlLoader from "@/components/CrawlLoader";
+import CrawlTimeline from "@/components/CrawlTimeline";
+import HomepageActivityFeed from "@/components/HomepageActivityFeed";
 import PageDiscovery, { type DiscoveredPage } from "@/components/PageDiscovery";
 import Results from "@/components/Results";
 import HowItWorks from "@/components/HowItWorks";
@@ -148,20 +149,23 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
       <Header />
 
-      <main className="flex-1 px-4 py-12 sm:px-6">
+      <main className="flex-1 px-4 py-12 sm:px-6 relative z-10">
         <div className="mx-auto max-w-3xl">
-          {/* Hero copy */}
+          {/* Hero — simple, utility-first + 90s Hello */}
           {step === "input" && (
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-                Extract any webpage as<br />
-                <span className="text-primary">Screenshot, Markdown & HTML</span>
+            <div className="mb-10 relative">
+              <div className="absolute -top-1 right-0 flex items-center gap-1.5 px-3 py-1.5 border-2 border-border bg-sticker shadow-card rounded-full">
+                <span className="font-mono text-xs font-medium text-white">Hello!</span>
+              </div>
+              <p className="font-mono text-xs text-muted-foreground mb-2">URL → Screenshot · Markdown · HTML</p>
+              <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">
+                Grab any webpage.
               </h1>
-              <p className="mt-3 text-base text-muted-foreground max-w-lg mx-auto">
-                Paste a URL, pick your pages and formats, download clean files. No sign-up, no API keys, completely free.
+              <p className="mt-3 text-sm text-muted-foreground max-w-lg leading-relaxed">
+                Paste a URL, select pages, download. No sign-up.
               </p>
             </div>
           )}
@@ -171,21 +175,23 @@ const Index = () => {
               <UrlInput onSubmit={handleSubmit} isLoading={step === "crawling"} />
             )}
 
+            {step === "input" && <HomepageActivityFeed />}
+
             {error && (
               <div className="rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive">
                 {error}
               </div>
             )}
 
-            {step === "crawling" && <CrawlLoader domain={domain} foundUrls={foundUrls} />}
+            {step === "crawling" && <CrawlTimeline domain={domain} foundUrls={foundUrls} />}
             {step === "discovery" && <PageDiscovery domain={domain} pages={discoveredPages} onExtract={handleExtract} />}
-            {step === "extracting" && <CrawlLoader domain={domain} extracting />}
+            {step === "extracting" && <CrawlTimeline domain={domain} foundUrls={foundUrls} extracting />}
 
             {step === "results" && (
               <>
                 <button
                   onClick={handleReset}
-                  className="text-sm text-primary hover:text-primary/80 font-medium transition-colors"
+                  className="font-mono text-xs text-accent hover:text-accent/80 transition-colors"
                 >
                   ← Grab another URL
                 </button>
@@ -194,8 +200,11 @@ const Index = () => {
             )}
           </div>
 
-          <p className="text-center text-xs text-muted-foreground mt-10">
-            Built by a designer who was tired of copying and pasting.
+          <p className="text-center font-mono text-xs text-muted-foreground mt-12">
+            Built by a designer tired of copy-pasting screenshots.{' '}
+            <a href="https://linkedin.com/in/preetarjun" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
+              Preeta
+            </a>
           </p>
         </div>
       </main>

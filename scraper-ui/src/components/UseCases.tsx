@@ -11,22 +11,22 @@ const UseCases = () => {
   ];
 
   return (
-    <section className="border-t border-border px-4 py-20 sm:px-6 bg-muted/30">
+    <section className="relative z-10 border-t-2 border-border px-4 py-20 sm:px-6 bg-muted/20">
       <div className="mx-auto max-w-5xl">
-        <div className="text-center mb-12">
-          <h2 className="text-2xl font-semibold tracking-tight">
-            Built for people who need results, not API docs
-          </h2>
-          <p className="mt-2 text-sm text-muted-foreground">From compliance teams to content strategists.</p>
+        <div className="mb-14">
+          <p className="font-mono text-xs text-muted-foreground uppercase tracking-wider mb-2">Use cases</p>
+          <h2 className="text-2xl font-semibold text-foreground">Results, not API docs</h2>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {cases.map((c) => (
-            <div key={c.title} className="rounded-xl border border-border bg-card p-5 shadow-card hover:shadow-card-hover transition-shadow">
-              <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
-                <c.icon className="h-4 w-4 text-primary" />
+            <div key={c.title} className="border-2 border-border bg-card shadow-card rounded-lg overflow-hidden hover:shadow-md hover:border-primary/40 transition-all group">
+              <div className="p-5">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg border-2 border-border bg-accent/20 group-hover:bg-accent/30 transition-colors mb-4">
+                  <c.icon className="h-5 w-5 text-accent-foreground" strokeWidth={2} />
+                </div>
+                <h3 className="text-base font-semibold text-foreground">{c.title}</h3>
+                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{c.desc}</p>
               </div>
-              <h3 className="text-sm font-semibold">{c.title}</h3>
-              <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">{c.desc}</p>
             </div>
           ))}
         </div>
